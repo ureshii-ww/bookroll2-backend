@@ -1,7 +1,7 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import {Club} from './club.schema';
-import {Book} from '../../book/schemas/book.schema';
+import { Club } from './club.schema';
+import { Book } from '../../book/schemas/book.schema';
 
 export type ListOfClubBooksDocument = ListOfClubBooks & mongoose.Document;
 
