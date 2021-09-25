@@ -1,3 +1,5 @@
+import * as mongoose from 'mongoose';
+
 export class CreateUserDto {
   readonly username: string;
   readonly email: string;
@@ -6,5 +8,6 @@ export class CreateUserDto {
   readonly club: null;
   readonly color: string;
   readonly emoji: string;
-  readonly reviews: [];
+  readonly reviews: mongoose.Types.ObjectId[];
+  readonly roles: mongoose.Types.ObjectId[];
 }
