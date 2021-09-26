@@ -10,6 +10,7 @@ import { Role, RoleSchema } from './schemas/role.schema';
     { name: User.name, schema: UserSchema },
     { name: Role.name, schema: RoleSchema }])],
   controllers: [UserController],
-  providers: [UserService]
+  providers: [UserService],
+  exports: [UserService]
 })
 export class UserModule {}
