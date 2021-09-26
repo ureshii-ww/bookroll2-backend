@@ -12,9 +12,10 @@ export class AuthController {
 
   @ApiOperation({summary: 'Registration'})
   @ApiBody({type: RegisterDto})
-  @ApiResponse({status: 200})
+  @ApiResponse({status: 201, description: 'User registered successfully'})
   @Post('register')
-  register(@Body() registerDto: RegisterDto) {
-    return this.AuthService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto) {
+    const newUser = await this.AuthService.register(registerDto);
+    return 'User registered successfully';
   }
 }
