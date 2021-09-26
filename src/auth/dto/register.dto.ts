@@ -8,7 +8,7 @@ export class RegisterDto {
   @Length(3, 32, {message: 'Username must be longer than 3 and shorter than 32 symbols'})
   readonly username: string;
 
-  @ApiProperty({example: 'usermail@gmail.com', required: true, description: 'Username'})
+  @ApiProperty({example: 'usermail@gmail.com', required: true, description: 'Email'})
   @IsString({message: 'Should be a string'})
   @IsEmail({}, {message: 'Should be an email'})
   readonly email: string;
