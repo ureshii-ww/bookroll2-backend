@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { Role } from './role.schema';
+import { Role } from '../../roles/schemas/role.schema';
 import { Club } from '../../club/schemas/club.schema';
 import { Review } from '../../review/schemas/review.schema';
 import { ApiProperty } from '@nestjs/swagger';
