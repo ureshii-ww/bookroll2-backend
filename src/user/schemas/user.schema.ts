@@ -55,6 +55,10 @@ export class User {
     description: 'Array of user\'s reviews in ObjectId' })
   @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Review' })
   reviewsList: Review[];
+
+  @ApiProperty({example: false, description: 'Is user\' email confirmed'})
+  @Prop()
+  isEmailConfirmed: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

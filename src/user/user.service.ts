@@ -37,7 +37,8 @@ export class UserService {
         emoji,
         roles,
         club: null,
-        reviews: []
+        reviews: [],
+        isEmailConfirmed: false
       }
     } catch (error) {
       throw new ServiceUnavailableException();

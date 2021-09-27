@@ -10,4 +10,5 @@ export class CreateUserDto {
   readonly emoji: string;
   readonly reviews: mongoose.Types.ObjectId[];
   readonly roles: mongoose.Types.ObjectId[];
+  readonly isEmailConfirmed: boolean;
 }
