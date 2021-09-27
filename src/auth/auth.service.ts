@@ -1,21 +1,22 @@
 import {
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
-  NotFoundException,
   UnauthorizedException
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
+import { SessionsService } from '../sessions/sessions.service';
+import { User } from '../user/schemas/user.schema';
+import { LoginServiceInterface } from './interface/loginService.interface';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService){}
+  constructor(private userService: UserService, private SessionService: SessionsService){}
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto): Promise<User> {
     const candidate = await this.userService.getUserByEmail(registerDto.email);
     if (candidate) {
       throw new HttpException('User with this email already exists', HttpStatus.BAD_REQUEST);
@@ -31,14 +32,28 @@ export class AuthService {
     })
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<LoginServiceInterface> {
     const user = await this.userService.getUserByEmail(loginDto.email);
-    const passwordEquals = await bcrypt.compare(loginDto.password, user.password);
-
-    if (user && passwordEquals) {
-
-      return user;
+    if (!user) {
+      throw new UnauthorizedException({message: 'Wrong email or password', status: HttpStatus.UNAUTHORIZED});
     }
-    throw new UnauthorizedException({message: 'Wrong email or password'});
+
+    const passwordEquals = await bcrypt.compare(loginDto.password, user.password)
+
+    if (passwordEquals) {
+      const tokens = await this.SessionService.createSession(user._id);
+      return {
+        refreshToken: tokens.refreshToken,
+        accessToken: tokens.accessToken,
+        userData: {
+          username: user.username,
+          url: user.url,
+          color: user.color,
+          emoji: user.emoji,
+          roles: user.roles
+        }
+      }
+    }
+    throw new UnauthorizedException({message: 'Wrong email or password', status: HttpStatus.UNAUTHORIZED});
   }
 }

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Response } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { User } from '../user/schemas/user.schema';
+import { LoginResponseInterface } from './interface/loginResponse.interface';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -25,7 +26,9 @@ export class AuthController {
   @ApiResponse({status: 200, type: User})
   @Post('login')
   @HttpCode(200)
-  login(@Body() loginDto: LoginDto): Promise<User> {
-    return this.AuthService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Response() res): Promise<LoginResponseInterface> {
+    const userData = await this.AuthService.login(loginDto);
+    return res.set({ 'x-access-token': userData.accessToken }).json(userData.userData);
   }
+
 }
