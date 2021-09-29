@@ -4,7 +4,6 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { User } from '../user/schemas/user.schema';
-import { UserDataForClient } from '../user/interfaces/userDataForClient.interface';
 
 @ApiTags('Authorization')
 @Controller('auth')

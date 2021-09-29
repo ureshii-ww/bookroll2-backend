@@ -10,8 +10,8 @@ import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { SessionsService } from '../sessions/sessions.service';
 import { UserDocument } from '../user/schemas/user.schema';
-import { UserDataForClient } from '../user/interfaces/userDataForClient.interface';
 import { SessionTokens } from '../sessions/interfaces/sessionTokens.interface';
+import { AuthData } from './interfaces/authData.interface';
 
 @Injectable()
 export class AuthService {
@@ -33,13 +33,12 @@ export class AuthService {
     })
   }
 
-  async login(loginDto: LoginDto): Promise<UserDataForClient & SessionTokens> {
+  async login(loginDto: LoginDto): Promise<AuthData & SessionTokens> {
     const user = await this.userService.getUserByEmail(loginDto.email);
     if (!user) {
       throw new UnauthorizedException({message: 'Wrong email or password', status: HttpStatus.UNAUTHORIZED});
     }
 
-    console.log(user);
     const passwordEquals: boolean = await bcrypt.compare(loginDto.password, user.password)
 
     if (passwordEquals) {

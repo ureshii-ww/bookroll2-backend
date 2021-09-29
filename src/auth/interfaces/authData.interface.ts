@@ -1,6 +1,6 @@
 import { Role } from '../../roles/schemas/role.schema';
 
-export interface UserDataForClient {
+export interface AuthData {
   readonly userData: {
     readonly username: string;
     readonly url: string;
