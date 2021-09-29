@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-export class NewUserDataDto {
+export interface NewUserData {
   readonly url: string;
   readonly club: null;
   readonly color: string;

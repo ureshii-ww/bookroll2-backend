@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { User } from '../user/schemas/user.schema';
-import { LoginResponseInterface } from './interface/loginResponse.interface';
+import { UserDataForClient } from '../user/interfaces/userDataForClient.interface';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -26,7 +26,7 @@ export class AuthController {
   @ApiResponse({status: 200, type: User})
   @Post('login')
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto, @Response() res): Promise<LoginResponseInterface> {
+  async login(@Body() loginDto: LoginDto, @Response() res): Promise<JSON> {
     const userData = await this.AuthService.login(loginDto);
     return res.set({ 'x-access-token': userData.accessToken }).json(userData.userData);
   }

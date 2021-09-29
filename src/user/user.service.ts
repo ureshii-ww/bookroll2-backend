@@ -7,14 +7,14 @@ import { nanoid } from 'nanoid/async';
 import * as randomcolor from 'randomcolor';
 import { randomEmoji } from '../helpers/randomEmoji';
 import { RolesService } from '../roles/roles.service';
-import { NewUserDataDto } from './dto/newUserData.dto';
+import { NewUserData } from './interfaces/newUserData.interface';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
               private rolesService: RolesService) {}
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<UserDocument> {
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
   }
@@ -23,7 +23,7 @@ export class UserService {
     return this.userModel.findOne({email}).exec();
   }
 
-  async generateNewUserData(): Promise<NewUserDataDto> {
+  async generateNewUserData(): Promise<NewUserData> {
     try {
       const userRole = await this.rolesService.getRoleByName('user');
       const url = await nanoid(12);

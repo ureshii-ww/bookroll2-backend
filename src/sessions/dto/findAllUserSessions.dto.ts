@@ -1,7 +1,5 @@
 import * as mongoose from 'mongoose';
 
-export class CreateSessionDto {
+export class FindAllUserSessionsDto {
   readonly userId: mongoose.Types.ObjectId;
-  readonly url: string;
-  readonly roles: string[];
 }

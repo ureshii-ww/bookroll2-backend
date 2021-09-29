@@ -9,20 +9,21 @@ import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { SessionsService } from '../sessions/sessions.service';
-import { User } from '../user/schemas/user.schema';
-import { LoginServiceInterface } from './interface/loginService.interface';
+import { UserDocument } from '../user/schemas/user.schema';
+import { UserDataForClient } from '../user/interfaces/userDataForClient.interface';
+import { SessionTokens } from '../sessions/interfaces/sessionTokens.interface';
 
 @Injectable()
 export class AuthService {
   constructor(private userService: UserService, private SessionService: SessionsService){}
 
-  async register(registerDto: RegisterDto): Promise<User> {
+  async register(registerDto: RegisterDto): Promise<UserDocument> {
     const candidate = await this.userService.getUserByEmail(registerDto.email);
     if (candidate) {
       throw new HttpException('User with this email already exists', HttpStatus.BAD_REQUEST);
     }
 
-    const hashPassword = await bcrypt.hash(registerDto.password, 8);
+    const hashPassword: string = await bcrypt.hash(registerDto.password, 8);
     const userData = await this.userService.generateNewUserData();
 
     return await this.userService.createUser({
@@ -32,16 +33,24 @@ export class AuthService {
     })
   }
 
-  async login(loginDto: LoginDto): Promise<LoginServiceInterface> {
+  async login(loginDto: LoginDto): Promise<UserDataForClient & SessionTokens> {
     const user = await this.userService.getUserByEmail(loginDto.email);
     if (!user) {
       throw new UnauthorizedException({message: 'Wrong email or password', status: HttpStatus.UNAUTHORIZED});
     }
 
-    const passwordEquals = await bcrypt.compare(loginDto.password, user.password)
+    console.log(user);
+    const passwordEquals: boolean = await bcrypt.compare(loginDto.password, user.password)
 
     if (passwordEquals) {
-      const tokens = await this.SessionService.createSession(user._id);
+      //mongoose + TS bug workaround
+      const rolesArray: string[] = user.roles.map(role => role.toString());
+
+      const tokens = await this.SessionService.createSession({
+        userId: user._id,
+        url: user.url,
+        roles: rolesArray
+      });
       return {
         refreshToken: tokens.refreshToken,
         accessToken: tokens.accessToken,
@@ -50,7 +59,8 @@ export class AuthService {
           url: user.url,
           color: user.color,
           emoji: user.emoji,
-          roles: user.roles
+          roles: user.roles,
+          isEmailConfirmed: user.isEmailConfirmed
         }
       }
     }
