@@ -54,7 +54,7 @@ export class User {
     example: '[606896ba6afd6e0458163ffc, 606896ba6afd6e0458163ffd]',
     description: 'Array of user\'s reviews in ObjectId' })
   @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Review' })
-  reviewsList: Review[];
+  reviewsArray: Review[];
 
   @ApiProperty({example: false, description: 'Is user\' email confirmed'})
   @Prop()

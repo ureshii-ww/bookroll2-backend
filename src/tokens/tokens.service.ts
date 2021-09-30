@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { GenerateAccessTokenDto } from './dto/generateAccessToken.dto';
 import { JwtService } from '@nestjs/jwt';
 import { nanoid } from 'nanoid';
+import { Role } from '../roles/schemas/role.schema';
 
 @Injectable()
 export class TokensService {
   constructor(private JwtService: JwtService) {
   }
 
-  generateAccessToken(generateAccessTokenDto: GenerateAccessTokenDto): string {
-    return this.JwtService.sign(generateAccessTokenDto);
+  generateAccessToken(url: string, roles: Role[]) {
+    return this.JwtService.sign({url, roles});
   }
 
-  generateRefreshToken(): string {
+  generateRefreshToken() {
     return nanoid();
   }
 }

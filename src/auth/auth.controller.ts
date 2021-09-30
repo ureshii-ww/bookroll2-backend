@@ -15,7 +15,7 @@ export class AuthController {
   @ApiBody({type: RegisterDto})
   @ApiResponse({status: 201, description: 'User registered successfully'})
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<string> {
+  async register(@Body() registerDto: RegisterDto) {
     const newUser = await this.AuthService.register(registerDto);
     return 'User registered successfully';
   }
@@ -25,9 +25,9 @@ export class AuthController {
   @ApiResponse({status: 200, type: User})
   @Post('login')
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto, @Response() res): Promise<JSON> {
-    const userData = await this.AuthService.login(loginDto);
-    return res.set({ 'x-access-token': userData.accessToken }).json(userData.userData);
+  async login(@Body() loginDto: LoginDto, @Response() res) {
+    const AuthData = await this.AuthService.login(loginDto);
+    return res.set({ 'x-access-token': AuthData.accessToken }).json(AuthData.userData);
   }
 
 }
