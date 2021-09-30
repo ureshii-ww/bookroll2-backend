@@ -4,6 +4,8 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { User } from '../user/schemas/user.schema';
+import * as ms from 'ms';
+import { REFRESH_TOKEN_EXPIRES } from '../constants/refresh-token-expires';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -26,8 +28,16 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   async login(@Body() loginDto: LoginDto, @Response() res) {
-    const AuthData = await this.AuthService.login(loginDto);
-    return res.set({ 'x-access-token': AuthData.accessToken }).json(AuthData.userData);
+    const authData = await this.AuthService.login(loginDto);
+
+    return res
+      .cookie('refreshToken', authData.refreshToken, {
+        maxAge: ms(REFRESH_TOKEN_EXPIRES),
+        httpOnly: true,
+        //secure: true
+      })
+      .set({ 'x-access-token': authData.accessToken })
+      .json(authData.userData);
   }
 
 }
