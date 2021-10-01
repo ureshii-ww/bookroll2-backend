@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { User } from '../../user/schemas/user.schema';
+import { REFRESH_TOKEN_EXPIRES } from '../../constants/refresh-token-expires';
 
 export type SessionDocument = Session & mongoose.Document;
 
@@ -12,7 +13,7 @@ export class Session {
   @Prop()
   refreshToken: string;
 
-  @Prop({ type: Date, expires: '1d', default: Date.now })
+  @Prop({ type: Date, expires: REFRESH_TOKEN_EXPIRES, default: Date.now })
   createdAt: Date
 }
 
