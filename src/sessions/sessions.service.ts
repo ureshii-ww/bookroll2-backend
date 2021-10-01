@@ -15,8 +15,10 @@ export class SessionsService {
   async createSession(userId: mongoose.Types.ObjectId, url: string, roles: Role[]) {
     const sessions = await this.findAllUserSessions(userId);
 
-    if (sessions.length >= 5) {
-      await this.deleteSession(sessions[sessions.length - 1].refreshToken);
+    const maxSessionsForUser: number = 5;
+    if (sessions.length >= maxSessionsForUser) {
+      const earliestSession = await this.getEarliestSessionFromSessionsArray(sessions);
+      await this.deleteSession(earliestSession.refreshToken);
     }
 
     const accessToken = this.TokensService.generateAccessToken(url, roles);
@@ -30,12 +32,18 @@ export class SessionsService {
 
   async findAllUserSessions(userId: mongoose.Types.ObjectId) {
     //mongoose.find() + TS bug workaround
-    const filter: any = {userId};
+    const filter: any = { userId };
 
     return this.sessionModel.find(filter);
   }
 
-  async deleteSession(refreshToken: string): Promise<any> {
+  async deleteSession(refreshToken: string) {
     return this.sessionModel.deleteOne({ refreshToken }).exec();
+  }
+
+  async getEarliestSessionFromSessionsArray(sessionsArray: SessionDocument[]) {
+    return sessionsArray.reduce((previousValue, currentValue) => {
+      return previousValue.createdAt > currentValue.createdAt ? currentValue : previousValue;
+    })
   }
 }
