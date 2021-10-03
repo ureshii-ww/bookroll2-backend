@@ -19,7 +19,7 @@ export class UserService {
   }
 
   async getUserByEmail(email: string) {
-    return this.userModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email }).populate('club').exec();
   }
 
   async generateNewUserData() {

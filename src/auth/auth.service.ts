@@ -57,4 +57,8 @@ export class AuthService {
 
     throw new UnauthorizedException({message: 'Wrong email or password', status: HttpStatus.UNAUTHORIZED});
   }
+
+  async logout (refreshToken: string) {
+    return this.SessionService.deleteSession(refreshToken);
+  }
 }
