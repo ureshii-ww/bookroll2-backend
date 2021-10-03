@@ -9,6 +9,7 @@ import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { SessionsService } from '../sessions/sessions.service';
+import { AuthUserDataWithTokens } from './types/authUserDataWithTokens';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,7 @@ export class AuthService {
     })
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<AuthUserDataWithTokens> {
     const user = await this.userService.getUserByEmail(loginDto.email);
     if (!user) {
       throw new UnauthorizedException({message: 'Wrong email or password', status: HttpStatus.UNAUTHORIZED});
@@ -50,7 +51,8 @@ export class AuthService {
           color: user.color,
           emoji: user.emoji,
           roles: user.roles,
-          isEmailConfirmed: user.isEmailConfirmed
+          isEmailConfirmed: user.isEmailConfirmed,
+          club: user.club?.url || null
         }
       }
     }

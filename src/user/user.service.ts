@@ -6,10 +6,12 @@ import { nanoid } from 'nanoid/async';
 import * as randomcolor from 'randomcolor';
 import { randomEmoji } from '../helpers/randomEmoji';
 import { RolesService } from '../roles/roles.service';
+import { Club, ClubDocument } from '../club/schemas/club.schema';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
+              @InjectModel(Club.name) private ClubModel: Model<ClubDocument>,
               private rolesService: RolesService) {
   }
 
@@ -19,7 +21,7 @@ export class UserService {
   }
 
   async getUserByEmail(email: string) {
-    return this.userModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email }).populate('club').exec();
   }
 
   async generateNewUserData() {

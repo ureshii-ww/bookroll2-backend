@@ -3,7 +3,6 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { User } from '../user/schemas/user.schema';
 import * as ms from 'ms';
 import { REFRESH_TOKEN_EXPIRES } from '../constants/refresh-token-expires';
 import { Request, Response } from 'express';

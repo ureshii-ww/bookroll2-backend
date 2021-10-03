@@ -4,24 +4,27 @@ import { ApiProperty } from '@nestjs/swagger';
 export class AuthUserData {
 
   @ApiProperty({example: 'username', description: 'Username' })
-  username: string;
+  readonly username: string;
 
   @ApiProperty({example: 'dQw4w9WgXcQ', description: 'User\'s url' })
-  url: string;
+  readonly url: string;
 
   @ApiProperty({example: '#FFFFFF', description: 'Main user\'s color' })
-  color: string;
+  readonly color: string;
 
   @ApiProperty({example: '😂', description: 'User\s emoji' })
-  emoji: string;
+  readonly emoji: string;
 
   @ApiProperty({
     type: [String],
     example: '[606896ba6afd6e0458163ffc, 606896ba6afd6e0458163ffd]',
     description: 'Array of user\'s roles in ObjectId',
     isArray: true})
-  roles: Role[];
+  readonly roles: Role[];
 
   @ApiProperty({example: false, description: 'Is user\' email confirmed'})
-  isEmailConfirmed: boolean;
+  readonly isEmailConfirmed: boolean;
+
+  @ApiProperty({example: "xjagGElge4-g", type: String || null, description: 'User\'s club URL or null'})
+  readonly club: string | null;
 }
