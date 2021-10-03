@@ -7,6 +7,7 @@ import { User } from '../user/schemas/user.schema';
 import * as ms from 'ms';
 import { REFRESH_TOKEN_EXPIRES } from '../constants/refresh-token-expires';
 import { Request, Response } from 'express';
+import { AuthUserData } from './types/authUserData';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -25,22 +26,24 @@ export class AuthController {
 
   @ApiOperation({summary: 'Login'})
   @ApiBody({type: LoginDto})
-  @ApiResponse({status: 200, type: User})
+  @ApiResponse({status: 200, type: AuthUserData})
   @Post('login')
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto, @Res() res) {
+  async login(@Body() loginDto: LoginDto, @Res({passthrough: true}) res: Response): Promise<AuthUserData> {
     const authData = await this.AuthService.login(loginDto);
-
-    return res
+    res
       .cookie('refreshToken', authData.refreshToken, {
         maxAge: ms(REFRESH_TOKEN_EXPIRES),
         httpOnly: true,
         //secure: true
       })
-      .set({ 'x-access-token': authData.accessToken })
-      .json(authData.userData);
+      .set({ 'x-access-token': authData.accessToken });
+
+    return authData.userData;
   }
 
+  @ApiOperation({summary: 'Logout'})
+  @ApiResponse({status: 200 })
   @Get('logout')
   @HttpCode(200)
   async logout(@Req() req: Request, @Res({passthrough: true}) res: Response) {
