@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -7,6 +7,7 @@ import * as randomcolor from 'randomcolor';
 import { randomEmoji } from '../helpers/randomEmoji';
 import { RolesService } from '../roles/roles.service';
 import { Club, ClubDocument } from '../club/schemas/club.schema';
+import { UserInfo } from './types/userInfo';
 
 @Injectable()
 export class UserService {
@@ -39,6 +40,22 @@ export class UserService {
       club: null,
       reviewsArray: null,
       isEmailConfirmed: false
+    }
+  }
+
+  async getUserInfo(url: string): Promise<UserInfo> {
+    const userData = await this.userModel.findOne({url}).populate(('club')).exec();
+
+    if (!userData) {
+      throw new NotFoundException({message: 'User not found', status: HttpStatus.NOT_FOUND})
+    }
+
+    return {
+      username: userData.username,
+      color: userData.color,
+      emoji: userData.emoji,
+      clubname: userData.club?.clubname || null,
+      clubUrl: userData.club?.url || null
     }
   }
 }
