@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { User } from '../../user/schemas/user.schema';
-import { Book } from '../../book/schemas/book.schema';
-import { ListOfBooks } from '../../list-of-books/schemas/list-of-books.shema'
+import { UserDocument } from '../../user/schemas/user.schema';
+import { BookDocument } from '../../book/schemas/book.schema';
+import { ListOfBooksDocument } from '../../list-of-books/schemas/list-of-books.shema'
 
 export type ClubDocument = Club & mongoose.Document;
 
@@ -15,25 +15,25 @@ export class Club {
   url: string;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
-  members: User[];
+  members: UserDocument[];
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Book' })
-  bookToRead: Book | null;
+  bookToRead: BookDocument | null;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  master: User;
+  master: UserDocument;
 
   @Prop()
   meetingNumber: number;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ListOfClubBooks' })
-  currentListOfBooks: ListOfBooks | null;
+  currentListOfBooks: ListOfBooksDocument | null;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ListOfClubBooks' })
-  previousListOfBooks: ListOfBooks | null;
+  previousListOfBooks: ListOfBooksDocument | null;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }] })
-  chosenBooksHistory: Book[] | null;
+  chosenBooksHistory: BookDocument[] | null;
 
   @Prop()
   clubRules: string | null;

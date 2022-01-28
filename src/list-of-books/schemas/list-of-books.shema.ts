@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Club } from '../../club/schemas/club.schema';
-import { Book } from '../../book/schemas/book.schema';
+import { ListItem, ListItemSchema } from './list-item';
 
 export type ListOfBooksDocument = ListOfBooks & mongoose.Document;
 
@@ -13,8 +13,8 @@ export class ListOfBooks {
   @Prop()
   meeting: number;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }] })
-  list: Book[] | null;
+  @Prop({ type: [ListItemSchema] })
+  list: ListItem[] | null;
 }
 
 export const ListOfBooksSchema = SchemaFactory.createForClass(ListOfBooks);
