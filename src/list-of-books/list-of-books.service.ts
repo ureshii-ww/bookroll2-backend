@@ -18,13 +18,11 @@ export class ListOfBooksService {
 
   async generateNewListOfBooks(clubUrl: string, meeting: number, userUrl: string, book: mongoose.Types.ObjectId) {
     const clubData = await this.ClubModel.findOne({}).populate('members').exec();
-    const list = clubData.members.map(member => {
+    return clubData.members.map(member => {
       return {
         user: member._id,
         books: null
       }
     });
-
-    return list;
   }
 }

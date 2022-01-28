@@ -8,6 +8,7 @@ import { RolesModule } from './roles/roles.module';
 import { TokensModule } from './tokens/tokens.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { ListOfBooksModule } from './list-of-books/list-of-books.module';
+import { BookModule } from './book/book.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ListOfBooksModule } from './list-of-books/list-of-books.module';
     TokensModule,
     SessionsModule,
     ListOfBooksModule,
+    BookModule,
   ],
 })
 export class AppModule {}

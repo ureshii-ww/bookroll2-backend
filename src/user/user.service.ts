@@ -4,7 +4,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { nanoid } from 'nanoid/async';
 import * as randomcolor from 'randomcolor';
-import { randomEmoji } from '../helpers/randomEmoji';
+import { randomEmoji } from '../utils/randomEmoji';
 import { RolesService } from '../roles/roles.service';
 import { Club, ClubDocument } from '../club/schemas/club.schema';
 import { UserInfo } from './types/userInfo';
