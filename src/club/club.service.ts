@@ -49,10 +49,9 @@ export class ClubService {
       throw new NotFoundException({ message: 'Club not found' })
     }
 
-    const { clubname, url, master, bookToRead } = clubData;
+    const { clubname, master, bookToRead } = clubData;
     return {
       clubname,
-      url,
       master: {
         url: master.url,
         username: master.username
