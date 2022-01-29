@@ -28,9 +28,14 @@ export class ClubController {
     return this.ClubService.getClubInfo(clubUrl);
   }
 
+  @ApiOperation({summary: 'Join the club'})
+  @ApiBody({type: JoinClubDto})
+  @ApiParam({name: 'clubUrl', required: true, description: 'Club\'s url', example: '8YoCsYP5QGx_'})
+  @ApiResponse({status: 200})
   @Post(':clubUrl/join')
-  joinClub(@Param('clubUrl') clubUrl: string,
+  async joinClub(@Param('clubUrl') clubUrl: string,
            @Body() joinClubDto: JoinClubDto){
-    return this.ClubService.joinClub(joinClubDto, clubUrl);
+    const club = await this.ClubService.joinClub(joinClubDto, clubUrl);
+    return {clubUrl: club.url};
   }
 }

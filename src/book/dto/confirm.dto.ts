@@ -1,6 +1,11 @@
-import { Book } from '../schemas/book.schema';
+import { ApiProperty } from '@nestjs/swagger';
+import { BookData } from '../types/book-data';
 
 export class ConfirmDto {
+
+  @ApiProperty({example: 'vRjcMmKkrbsc', required: true, description: 'The url of the user'})
   readonly userUrl: string;
-  readonly book: Book;
+
+  @ApiProperty({required: true, description: 'Book data'})
+  readonly book: BookData;
 }
