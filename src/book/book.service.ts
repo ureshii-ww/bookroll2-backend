@@ -33,7 +33,7 @@ export class BookService {
     return bookInDb;
   }
 
-  async confirmBook({ userUrl, book }: ConfirmDto) {
+  async confirmBook({ book }: ConfirmDto, userUrl: string) {
     const savedBook = await this.saveBook(book);
     const user = await this.UserModel.findOne({ url: userUrl }).populate('club').exec();
     const club = user.club;

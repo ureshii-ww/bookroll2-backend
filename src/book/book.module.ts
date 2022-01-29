@@ -8,6 +8,7 @@ import { ListOfBooksModule } from '../list-of-books/list-of-books.module';
 import { UserModule } from '../user/user.module';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { ListOfBooks, ListOfBooksSchema } from '../list-of-books/schemas/list-of-books.shema';
+import { TokensModule } from '../tokens/tokens.module';
 
 @Module({
   controllers: [BookController],
@@ -20,7 +21,8 @@ import { ListOfBooks, ListOfBooksSchema } from '../list-of-books/schemas/list-of
       {name: ListOfBooks.name, schema: ListOfBooksSchema}
     ]),
     ListOfBooksModule,
-    UserModule
+    UserModule,
+    TokensModule
   ]
 })
 export class BookModule {}

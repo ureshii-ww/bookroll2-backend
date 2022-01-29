@@ -25,8 +25,8 @@ export class SessionsService {
     const refreshToken = this.TokensService.generateRefreshToken();
 
     const newSession = new this.sessionModel({ userId, refreshToken });
-
     await newSession.save();
+
     return { accessToken, refreshToken }
   }
 

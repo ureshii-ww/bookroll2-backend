@@ -13,6 +13,6 @@ import { ConfigModule } from '@nestjs/config';
     }
   })],
   providers: [TokensService],
-  exports: [TokensService]
+  exports: [TokensService, JwtModule]
 })
 export class TokensModule {}

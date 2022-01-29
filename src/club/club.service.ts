@@ -5,8 +5,7 @@ import { Model } from 'mongoose';
 import { nanoid } from 'nanoid';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { ClubInfo } from './types/club-info';
-import { UserService } from '../user/user.service';
-import { JoinClubDto } from './dto/join-club.dto';
+import { CreateClubDto } from './dto/create-club.dto';
 
 @Injectable()
 export class ClubService {
@@ -14,7 +13,7 @@ export class ClubService {
               @InjectModel(User.name) private UserModel: Model<UserDocument>) {
   }
 
-  async createClub(clubname: string, userUrl: string) {
+  async createClub({ clubname }: CreateClubDto, userUrl: string) {
     const newClubData = await this.generateNewClubData(clubname, userUrl);
     return this.createClubDocument(newClubData);
   }
@@ -63,19 +62,19 @@ export class ClubService {
     }
   }
 
-  async joinClub({ userUrl }: JoinClubDto, url: string) {
-    const club = await this.ClubModel.findOne({url}).populate('members').exec();
+  async joinClub(userUrl: string, url: string) {
+    const club = await this.ClubModel.findOne({ url }).populate('members').exec();
     if (!club) {
       throw new NotFoundException({ message: 'Club not found' })
     }
 
-    if(club.members.some(member => member.url === userUrl)) {
-      throw new BadRequestException({message: 'User already in the club'})
+    if (club.members.some(member => member.url === userUrl)) {
+      throw new BadRequestException({ message: 'User already in the club' })
     }
 
-    const user = await this.UserModel.findOne({url: userUrl}).exec();
+    const user = await this.UserModel.findOne({ url: userUrl }).exec();
     if (!user) {
-      throw new BadRequestException({message: 'User doesn\'t exist'})
+      throw new BadRequestException({ message: 'User doesn\'t exist' })
     }
 
     user.club = club._id;
