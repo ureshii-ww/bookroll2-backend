@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Club, ClubDocument } from './schemas/club.schema';
 import { Model } from 'mongoose';
@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { ClubInfo } from './types/club-info';
 import { UserService } from '../user/user.service';
+import { JoinClubDto } from './dto/join-club.dto';
 
 @Injectable()
 export class ClubService {
@@ -60,5 +61,24 @@ export class ClubService {
         authors: bookToRead.authors
       } : null
     }
+  }
+
+  async joinClub({ userUrl }: JoinClubDto, url: string) {
+    const club = await this.ClubModel.findOne({url}).populate('members').exec();
+    if (!club) {
+      throw new NotFoundException({ message: 'Club not found' })
+    }
+
+    if(club.members.some(member => member.url === userUrl)) {
+      throw new BadRequestException({message: 'User already in the club'})
+    }
+
+    const user = await this.UserModel.findOne({url: userUrl}).exec();
+    if (!user) {
+      throw new BadRequestException({message: 'User doesn\'t exist'})
+    }
+
+    club.members.push(user._id);
+    return club.save();
   }
 }

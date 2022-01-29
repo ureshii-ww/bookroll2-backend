@@ -3,6 +3,7 @@ import { ClubService } from './club.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiParam } from '@nestjs/swagger';
 import { ClubInfo } from './types/club-info';
+import { JoinClubDto } from './dto/join-club.dto';
 
 @ApiTags('Club')
 @Controller('club')
@@ -25,5 +26,11 @@ export class ClubController {
   @Get(':clubUrl/info')
   getInfo(@Param('clubUrl') clubUrl: string) {
     return this.ClubService.getClubInfo(clubUrl);
+  }
+
+  @Post(':clubUrl/join')
+  joinClub(@Param('clubUrl') clubUrl: string,
+           @Body() joinClubDto: JoinClubDto){
+    return this.ClubService.joinClub(joinClubDto, clubUrl);
   }
 }
