@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumberString, IsString, IsUrl } from 'class-validator';
 
 export class BookData {
 
   @ApiProperty({example: 'title'})
+  @IsString()
+  @IsNotEmpty()
   title: string;
 
   @ApiProperty({example: ['author1', 'author2']})
@@ -12,6 +15,7 @@ export class BookData {
   year: string;
 
   @ApiProperty({example: 'https://link.com'})
+  @IsUrl()
   cover: string;
 
   @ApiProperty({example: 'description text'})
