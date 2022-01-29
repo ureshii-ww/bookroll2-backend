@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { Role } from '../../roles/schemas/role.schema';
-import { Club } from '../../club/schemas/club.schema';
-import { Review } from '../../review/schemas/review.schema';
+import { Role, RoleDocument } from '../../roles/schemas/role.schema';
+import { Club, ClubDocument } from '../../club/schemas/club.schema';
+import { Review, ReviewDocument } from '../../review/schemas/review.schema';
 import { ApiProperty } from '@nestjs/swagger';
 
 export type UserDocument = User & mongoose.Document;
@@ -32,14 +32,14 @@ export class User {
     description: 'Array of user\'s roles in ObjectId',
     isArray: true})
   @Prop({type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }] })
-  roles: Role[];
+  roles: RoleDocument[];
 
   @ApiProperty({
     type: mongoose.Schema.Types.ObjectId,
     example: '606896ba6afd6e0458163ffd',
     description: 'ObjectID of User\'s club'})
   @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Club' })
-  club: Club;
+  club: ClubDocument;
 
   @ApiProperty({example: '#FFFFFF', description: 'Main user\'s color' })
   @Prop()
@@ -54,7 +54,7 @@ export class User {
     example: '[606896ba6afd6e0458163ffc, 606896ba6afd6e0458163ffd]',
     description: 'Array of user\'s reviews in ObjectId' })
   @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Review' })
-  reviewsArray: Review[];
+  reviewsArray: ReviewDocument[];
 
   @ApiProperty({example: false, description: 'Is user\' email confirmed'})
   @Prop()

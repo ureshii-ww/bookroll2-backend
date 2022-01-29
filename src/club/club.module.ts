@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Club, ClubSchema } from './schemas/club.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { Book, BookSchema } from '../book/schemas/book.schema';
+import { UserModule } from '../user/user.module';
 
 @Module({
   controllers: [ClubController],
@@ -14,7 +15,8 @@ import { Book, BookSchema } from '../book/schemas/book.schema';
       {name: Club.name, schema: ClubSchema},
       {name: User.name, schema: UserSchema},
       {name: Book.name, schema: BookSchema}
-    ])
+    ]),
+    UserModule
   ]
 })
 export class ClubModule {}

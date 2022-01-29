@@ -44,7 +44,7 @@ export class UserService {
   }
 
   async getUserInfo(url: string): Promise<UserInfo> {
-    const userData = await this.userModel.findOne({url}).populate(('club')).exec();
+    const userData = await this.userModel.findOne({ url }).populate('club').exec();
 
     if (!userData) {
       throw new NotFoundException({message: 'User not found', status: HttpStatus.NOT_FOUND})

@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { UserDocument } from '../../user/schemas/user.schema';
 import { BookDocument } from '../../book/schemas/book.schema';
-import { ListOfBooksDocument } from '../../list-of-books/schemas/list-of-books.shema'
 
 export type ClubDocument = Club & mongoose.Document;
 
@@ -25,12 +24,6 @@ export class Club {
 
   @Prop()
   meetingNumber: number;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ListOfClubBooks' })
-  currentListOfBooks: ListOfBooksDocument | null;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ListOfClubBooks' })
-  previousListOfBooks: ListOfBooksDocument | null;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }] })
   chosenBooksHistory: BookDocument[] | null;

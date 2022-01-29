@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { nanoid } from 'nanoid';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { ClubInfo } from './types/club-info';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ClubService {
@@ -24,7 +25,7 @@ export class ClubService {
 
   async generateNewClubData(clubname: string, userUrl: string): Promise<Club> {
     const url = await nanoid(12);
-    const master = await this.UserModel.findOne({ url: userUrl }).exec();
+    const master = await this.UserModel.findOne({ url: userUrl }).populate('master').exec();
     const members = [master._id];
 
     return {
@@ -34,8 +35,6 @@ export class ClubService {
       bookToRead: null,
       master: master._id,
       meetingNumber: 1,
-      currentListOfBooks: null,
-      previousListOfBooks: null,
       chosenBooksHistory: null,
       clubRules: null
     }

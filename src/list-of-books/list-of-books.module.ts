@@ -11,6 +11,7 @@ import { Club, ClubSchema } from '../club/schemas/club.schema';
       {name: ListOfBooks.name, schema: ListOfBooksSchema},
       {name: Club.name, schema: ClubSchema}
     ])
-  ]
+  ],
+  exports: [ListOfBooksService]
 })
 export class ListOfBooksModule {}
