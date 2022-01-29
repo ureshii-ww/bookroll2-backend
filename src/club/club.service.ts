@@ -78,6 +78,8 @@ export class ClubService {
       throw new BadRequestException({message: 'User doesn\'t exist'})
     }
 
+    user.club = club._id;
+    await user.save();
     club.members.push(user._id);
     return club.save();
   }
