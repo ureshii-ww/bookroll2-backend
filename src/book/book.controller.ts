@@ -1,13 +1,14 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { BookService } from './book.service';
 import { ConfirmDto } from './dto/confirm.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Book } from './schemas/book.schema';
 import { BookData } from './types/book-data';
 import { TokensGuard } from '../tokens/tokens.guard';
 import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
 
 @ApiTags('Book')
+@ApiHeader({name: 'Authorization', description: 'Bearer token'})
 @Controller('book')
 @UseGuards(TokensGuard)
 export class BookController {
