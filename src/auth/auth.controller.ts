@@ -54,7 +54,7 @@ export class AuthController {
 
   @ApiOperation({summary: "Refresh session"})
   @ApiBody({type: RefreshSessionDto})
-  @ApiResponse({status: 200})
+  @ApiResponse({status: 201})
   @Post('refresh')
   async refreshSession(@Body() refreshSessionDto: RefreshSessionDto,
                        @Req() req: Request,
