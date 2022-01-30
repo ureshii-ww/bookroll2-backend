@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ClubService } from './club.service';
 import { CreateClubDto } from './dto/create-club.dto';
-import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiParam, ApiHeader } from '@nestjs/swagger';
 import { ClubInfo } from './types/club-info';
 import { TokensGuard } from '../tokens/tokens.guard';
 import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
 
 @ApiTags('Club')
+@ApiHeader({name: 'Authorization', description: 'Bearer token'})
 @Controller('club')
 @UseGuards(TokensGuard)
 export class ClubController {

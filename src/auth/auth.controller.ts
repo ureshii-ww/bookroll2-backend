@@ -7,6 +7,7 @@ import * as ms from 'ms';
 import { REFRESH_TOKEN_EXPIRES } from '../constants/refresh-token-expires';
 import { Request, Response } from 'express';
 import { AuthUserData } from './types/authUserData';
+import { RefreshSessionDto } from './dto/refreshSession.dto';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -49,5 +50,19 @@ export class AuthController {
     const {refreshToken} = req.cookies;
     await this.AuthService.logout(refreshToken);
     res.clearCookie('refreshToken');
+  }
+
+  @Get('refresh')
+  async refreshSession(@Body() refreshSessionDto: RefreshSessionDto,
+                       @Req() req: Request,
+                       @Res({passthrough: true}) res: Response) {
+    const {refreshToken} = req.cookies;
+    const newTokens = await this.AuthService.refreshSession(refreshSessionDto, refreshToken);
+    res.cookie('refreshToken', newTokens.refreshToken, {
+      maxAge: ms(REFRESH_TOKEN_EXPIRES),
+      httpOnly: true,
+      //secure: true
+    })
+      .set({ 'x-access-token': newTokens.accessToken }).sendStatus(201);
   }
 }

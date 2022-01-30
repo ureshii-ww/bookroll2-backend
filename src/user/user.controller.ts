@@ -1,10 +1,11 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserInfo } from './types/userInfo';
 import { TokensGuard } from '../tokens/tokens.guard';
 
 @ApiTags('User')
+@ApiHeader({name: 'Authorization', description: 'Bearer token'})
 @Controller('user')
 @UseGuards(TokensGuard)
 export class UserController {

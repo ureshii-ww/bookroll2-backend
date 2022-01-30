@@ -46,4 +46,8 @@ export class SessionsService {
       return previousValue.createdAt > currentValue.createdAt ? currentValue : previousValue;
     })
   }
+
+  async getSession(refreshToken: string) {
+    return this.sessionModel.findOne({refreshToken}).populate('userId').exec();
+  }
 }

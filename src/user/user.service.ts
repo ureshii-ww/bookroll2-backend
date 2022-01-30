@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -25,6 +25,10 @@ export class UserService {
     return this.userModel.findOne({ email }).populate('club').exec();
   }
 
+  async getUserByUrl(url: string) {
+    return this.userModel.findOne({url}).populate('club').exec();
+  }
+
   async generateNewUserData() {
     const userRole = await this.rolesService.getRoleByName('user');
     const url = await nanoid(12);
@@ -47,7 +51,7 @@ export class UserService {
     const userData = await this.userModel.findOne({ url }).populate('club').exec();
 
     if (!userData) {
-      throw new NotFoundException({message: 'User not found', status: HttpStatus.NOT_FOUND})
+      throw new NotFoundException({ message: 'User not found', status: HttpStatus.NOT_FOUND })
     }
 
     return {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Book, BookDocument } from './schemas/book.schema';
 import { Model } from 'mongoose';
@@ -26,7 +26,7 @@ export class BookService {
   }
 
   async saveBook(bookData: Book) {
-    const bookInDb = await this.BookModel.findOne({title: bookData.title, authors: bookData.authors}).exec();
+    const bookInDb = await this.BookModel.findOne({ title: bookData.title, authors: bookData.authors }).exec();
     if (!bookInDb) {
       return new this.BookModel(bookData).save();
     }
@@ -36,6 +36,9 @@ export class BookService {
   async confirmBook({ book }: ConfirmDto, userUrl: string) {
     const savedBook = await this.saveBook(book);
     const user = await this.UserModel.findOne({ url: userUrl }).populate('club').exec();
+    if (!user) {
+      throw new BadRequestException();
+    }
     const club = user.club;
     const listOfBooks = await this.ListOfBooksService.getListOfBooks(club._id, club.meetingNumber);
     //Creates list for the given club and meeting if one doesn't exist
@@ -45,8 +48,8 @@ export class BookService {
     //Finds an index of users' item in the list
     const index = listOfBooks.list.findIndex(el => el.user._id.toString() === user._id.toString());
     //Creates user's item if there's no one
-    if(index === -1) {
-      listOfBooks.list.push({user: user._id, books: [savedBook._id]});
+    if (index === -1) {
+      listOfBooks.list.push({ user: user._id, books: [savedBook._id] });
       return listOfBooks.save();
     }
 

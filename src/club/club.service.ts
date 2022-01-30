@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Club, ClubDocument } from './schemas/club.schema';
 import { Model } from 'mongoose';
@@ -14,8 +20,13 @@ export class ClubService {
   }
 
   async createClub({ clubname }: CreateClubDto, userUrl: string) {
-    const newClubData = await this.generateNewClubData(clubname, userUrl);
-    return this.createClubDocument(newClubData);
+    const user = await this.UserModel.findOne({ url: userUrl }).exec();
+    if (user.club) {
+      throw new ConflictException({ message: 'User already has a club' });
+    }
+
+    const newClub = await this.createClubDocument(await this.generateNewClubData(clubname, userUrl));
+    user.club = newClub._id
   }
 
   createClubDocument(newClub: Club) {
@@ -65,11 +76,11 @@ export class ClubService {
   async joinClub(userUrl: string, url: string) {
     const club = await this.ClubModel.findOne({ url }).populate('members').exec();
     if (!club) {
-      throw new NotFoundException({ message: 'Club not found' })
+      throw new BadRequestException({ message: 'Club not found' })
     }
 
     if (club.members.some(member => member.url === userUrl)) {
-      throw new BadRequestException({ message: 'User already in the club' })
+      throw new ConflictException({ message: 'User already in the club' })
     }
 
     const user = await this.UserModel.findOne({ url: userUrl }).exec();
