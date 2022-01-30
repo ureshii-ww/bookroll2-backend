@@ -52,7 +52,10 @@ export class AuthController {
     res.clearCookie('refreshToken');
   }
 
-  @Get('refresh')
+  @ApiOperation({summary: "Refresh session"})
+  @ApiBody({type: RefreshSessionDto})
+  @ApiResponse({status: 200})
+  @Post('refresh')
   async refreshSession(@Body() refreshSessionDto: RefreshSessionDto,
                        @Req() req: Request,
                        @Res({passthrough: true}) res: Response) {

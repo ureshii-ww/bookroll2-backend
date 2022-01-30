@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   HttpException,
   HttpStatus,
-  Injectable,
+  Injectable, UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register.dto';
@@ -68,14 +68,18 @@ export class AuthService {
   }
 
   async refreshSession({userUrl}: RefreshSessionDto, refreshToken: string) {
+    if (!refreshToken) {
+      throw new UnauthorizedException();
+    }
+
     const user = await this.userService.getUserByUrl(userUrl);
     if (!user) {
-      throw new ForbiddenException();
+      throw new UnauthorizedException();
     }
 
     const session = await this.SessionService.getSession(refreshToken);
     if (!session || session.userId.url !== userUrl) {
-      throw new ForbiddenException();
+      throw new UnauthorizedException();
     }
 
     await this.SessionService.deleteSession(refreshToken);
