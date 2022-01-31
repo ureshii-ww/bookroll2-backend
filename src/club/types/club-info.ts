@@ -16,4 +16,10 @@ export class ClubInfo {
     title: string,
     authors: string[]
   } | null;
+
+  @ApiProperty({example: true, description: 'Check if the user in club'})
+  readonly isInClub: boolean;
+
+  @ApiProperty({example: false, description: 'Check if the user is club\'s master'})
+  readonly isMaster: boolean;
 }

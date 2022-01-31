@@ -27,8 +27,8 @@ export class ClubController {
   @ApiResponse({ status: 200, type: ClubInfo })
   @ApiParam({ name: 'clubUrl', required: true, description: 'Club\'s url', example: '8YoCsYP5QGx_' })
   @Get(':clubUrl/info')
-  getInfo(@Param('clubUrl') clubUrl: string) {
-    return this.ClubService.getClubInfo(clubUrl);
+  getInfo(@Param('clubUrl') clubUrl: string, @Req() req: ReqWithTokensData) {
+    return this.ClubService.getClubInfo(clubUrl, req.user.url);
   }
 
   @ApiOperation({ summary: 'Join the club' })

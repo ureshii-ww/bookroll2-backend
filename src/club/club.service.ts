@@ -51,13 +51,15 @@ export class ClubService {
     }
   }
 
-  async getClubInfo(clubUrl: string): Promise<ClubInfo> {
+  async getClubInfo(clubUrl: string, userUrl: string): Promise<ClubInfo> {
     const clubData = await this.ClubModel.findOne({ url: clubUrl })
-      .populate('master').populate('bookToRead').exec();
+      .populate('master').populate('bookToRead').populate('members').exec();
 
     if (!clubData) {
       throw new NotFoundException({ message: 'Club not found' })
     }
+
+    const isInClub: boolean = clubData.members.some(member => member.url === userUrl);
 
     const { clubname, master, bookToRead } = clubData;
     return {
@@ -69,7 +71,9 @@ export class ClubService {
       bookToRead: bookToRead ? {
         title: bookToRead.title,
         authors: bookToRead.authors
-      } : null
+      } : null,
+      isMaster: userUrl === master.url,
+      isInClub: isInClub
     }
   }
 
