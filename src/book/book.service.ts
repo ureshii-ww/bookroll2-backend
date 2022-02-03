@@ -40,6 +40,10 @@ export class BookService {
       throw new BadRequestException();
     }
     const club = user.club;
+    if (!club) {
+      throw new BadRequestException();
+    }
+
     const listOfBooks = await this.ListOfBooksService.getListOfBooks(club._id, club.meetingNumber);
     //Creates list for the given club and meeting if one doesn't exist
     if (!listOfBooks) {

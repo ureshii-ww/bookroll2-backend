@@ -8,12 +8,16 @@ import { randomEmoji } from '../utils/randomEmoji';
 import { RolesService } from '../roles/roles.service';
 import { Club, ClubDocument } from '../club/schemas/club.schema';
 import { UserInfo } from './types/userInfo';
+import { ListOfBooksService } from '../list-of-books/list-of-books.service';
+import paginate from '../utils/paginate';
+import { UserBooksData } from './types/userBooksData';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
               @InjectModel(Club.name) private ClubModel: Model<ClubDocument>,
-              private rolesService: RolesService) {
+              private rolesService: RolesService,
+              private listOfBooksService: ListOfBooksService) {
   }
 
   async createUser(newUser: User) {
@@ -60,6 +64,26 @@ export class UserService {
       emoji: userData.emoji,
       clubname: userData.club?.clubname || null,
       clubUrl: userData.club?.url || null
+    }
+  }
+
+  async getUserBooks(url: string, page: number, size: number): Promise<UserBooksData> {
+    const user = await this.userModel.findOne({ url }).populate('club').exec();
+    const clubId = user.club._id;
+    const meetingNumber = user.club.meetingNumber;
+    const listOfBooks = await this.listOfBooksService.getListOfBooksPopulated(clubId, meetingNumber);
+    if (!listOfBooks) {
+      return null;
+    }
+
+    const userBooks = listOfBooks.list.find(el => el.user.toString() === user._id.toString());
+    if (!userBooks) {
+      return null;
+    }
+
+    return {
+      length: userBooks.books.length,
+      list: paginate(userBooks.books, page, size)
     }
   }
 }

@@ -6,6 +6,7 @@ import { User, UserSchema } from './schemas/user.schema';
 import { RolesModule } from '../roles/roles.module';
 import { Club, ClubSchema } from '../club/schemas/club.schema';
 import { TokensModule } from '../tokens/tokens.module';
+import { ListOfBooksModule } from '../list-of-books/list-of-books.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { TokensModule } from '../tokens/tokens.module';
       { name: Club.name, schema: ClubSchema }
     ]),
     RolesModule,
-    TokensModule
+    TokensModule,
+    ListOfBooksModule
   ],
   controllers: [UserController],
   providers: [UserService],

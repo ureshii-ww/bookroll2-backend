@@ -24,4 +24,15 @@ export class ListOfBooksService {
     const query: any = {club: new mongoose.Types.ObjectId(club), meetingNumber}
     return this.ListOfBooksModel.findOne(query).populate('list').exec()
   }
+
+  async getListOfBooksPopulated(club: string, meetingNumber: number) {
+    const query: any = {club: new mongoose.Types.ObjectId(club), meetingNumber}
+    return this.ListOfBooksModel.findOne(query).populate({
+      path: 'list',
+      populate: {
+        path: 'books',
+        model: 'Book'
+      }
+    }).exec()
+  }
 }

@@ -27,6 +27,6 @@ export class BookController {
   @Post('confirm')
   async confirmBook(@Body() confirmDto: ConfirmDto, @Req() req: ReqWithTokensData) {
     await this.BookService.confirmBook(confirmDto, req.user.url);
-    return 'Book added successfully'
+    return 'Book added successfully';
   }
 }

@@ -7,7 +7,11 @@ import * as cookieParser from 'cookie-parser';
 async function start() {
   const PORT = process.env.PORT || 8000;
   const app = await NestFactory.create(AppModule);
-  app.enableCors({origin: 'http://localhost:3000', credentials: true, exposedHeaders: 'x-access-token'});
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    exposedHeaders: ['x-access-token', 'x-data-length']
+  });
   app.use(cookieParser());
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
@@ -19,7 +23,9 @@ async function start() {
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('/docs/', app, swaggerDocument);
 
-  await app.listen(PORT, () => {console.log(`Server started on port ${PORT}`)});
+  await app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`)
+  });
 }
 
 start();
