@@ -19,8 +19,7 @@ export class ClubController {
   @ApiResponse({ status: 201, description: 'Club created successfully' })
   @Post('create')
   async createClub(@Body() createClubDto: CreateClubDto, @Req() req: ReqWithTokensData) {
-    const newClub = await this.ClubService.createClub(createClubDto, req.user.url);
-    return 'Club created successfully'
+    return await this.ClubService.createClub(createClubDto, req.user.url);
   }
 
   @ApiOperation({ summary: 'Get club info' })

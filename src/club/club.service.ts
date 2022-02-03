@@ -12,6 +12,7 @@ import { nanoid } from 'nanoid';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { ClubInfo } from './types/club-info';
 import { CreateClubDto } from './dto/create-club.dto';
+import { AuthUserData } from '../auth/types/authUserData';
 
 @Injectable()
 export class ClubService {
@@ -19,14 +20,24 @@ export class ClubService {
               @InjectModel(User.name) private UserModel: Model<UserDocument>) {
   }
 
-  async createClub({ clubname }: CreateClubDto, userUrl: string) {
+  async createClub({ clubname }: CreateClubDto, userUrl: string): Promise<AuthUserData> {
     const user = await this.UserModel.findOne({ url: userUrl }).exec();
     if (user.club) {
       throw new ConflictException({ message: 'User already has a club' });
     }
 
     const newClub = await this.createClubDocument(await this.generateNewClubData(clubname, userUrl));
-    user.club = newClub._id
+    user.club = newClub._id;
+    const userData = await user.save();
+    return {
+      username: userData.username,
+      url: userData.url,
+      color: userData.color,
+      emoji: userData.emoji,
+      roles: userData.roles,
+      isEmailConfirmed: userData.isEmailConfirmed,
+      club: user.club.url
+    }
   }
 
   createClubDocument(newClub: Club) {
