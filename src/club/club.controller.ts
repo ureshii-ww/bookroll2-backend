@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ClubService } from './club.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiParam, ApiHeader } from '@nestjs/swagger';
@@ -8,7 +8,7 @@ import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
 import { AuthUserData } from '../auth/types/authUserData';
 
 @ApiTags('Club')
-@ApiHeader({name: 'Authorization', description: 'Bearer token'})
+@ApiHeader({ name: 'Authorization', description: 'Bearer token' })
 @Controller('club')
 @UseGuards(TokensGuard)
 export class ClubController {
@@ -34,6 +34,7 @@ export class ClubController {
   @ApiOperation({ summary: 'Join the club' })
   @ApiParam({ name: 'clubUrl', required: true, description: 'Club\'s url', example: '8YoCsYP5QGx_' })
   @ApiResponse({ status: 200 })
+  @HttpCode(200)
   @Post(':clubUrl/join')
   async joinClub(@Param('clubUrl') clubUrl: string,
                  @Req() req: ReqWithTokensData) {
@@ -41,6 +42,10 @@ export class ClubController {
     return { clubUrl: club.url };
   }
 
+  @ApiOperation({ summary: 'Leave the club' })
+  @ApiParam({ name: 'clubUrl', required: true, description: 'Club\'s url', example: '8YoCsYP5QGx_' })
+  @ApiResponse({ status: 200, type: AuthUserData })
+  @HttpCode(200)
   @Post(':clubUrl/leave')
   async leaveClub(@Param('clubUrl') clubUrl: string,
                   @Req() req: ReqWithTokensData) {
