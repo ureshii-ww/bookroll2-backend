@@ -21,7 +21,7 @@ export class ClubService {
   }
 
   async createClub({ clubname }: CreateClubDto, userUrl: string): Promise<AuthUserData> {
-    const user = await this.UserModel.findOne({ url: userUrl }).exec();
+    const user = await this.UserModel.findOne({ url: userUrl }).populate('club').exec();
     if (user.club) {
       throw new ConflictException({ message: 'User already has a club' });
     }
@@ -36,7 +36,7 @@ export class ClubService {
       emoji: userData.emoji,
       roles: userData.roles,
       isEmailConfirmed: userData.isEmailConfirmed,
-      club: user.club.url
+      club: newClub.url
     }
   }
 
@@ -75,15 +75,15 @@ export class ClubService {
     const { clubname, master, bookToRead } = clubData;
     return {
       clubname,
-      master: {
+      master: master ? {
         url: master.url,
         username: master.username
-      },
+      } : null,
       bookToRead: bookToRead ? {
         title: bookToRead.title,
         authors: bookToRead.authors
       } : null,
-      isMaster: userUrl === master.url,
+      isMaster: master ? userUrl === master.url : false,
       isInClub: isInClub
     }
   }
@@ -107,5 +107,48 @@ export class ClubService {
     await user.save();
     club.members.push(user._id);
     return club.save();
+  }
+
+  async leaveClub(clubUrl: string, userUrl: string): Promise<AuthUserData> {
+    const club = await this.ClubModel.findOne({ url: clubUrl }).populate('master').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+
+    const user = await this.UserModel.findOne({ url: userUrl }).exec();
+    if (!user) {
+      throw new BadRequestException();
+    }
+
+    if (!user.club) {
+      throw new ConflictException();
+    }
+
+    const userIndex = club.members.indexOf(user._id);
+    if (userIndex === -1) {
+      throw new ConflictException();
+    }
+
+    club.members.splice(userIndex, 1);
+
+    if (club.master.url === userUrl) {
+      if (club.members.length > 0) {
+        club.master = club.members[0];
+      } else club.master = null;
+    }
+
+    await club.save();
+    user.club = null;
+    const userData = await user.save();
+
+    return {
+      username: userData.username,
+      url: userData.url,
+      color: userData.color,
+      emoji: userData.emoji,
+      club: null,
+      roles: userData.roles,
+      isEmailConfirmed: userData.isEmailConfirmed
+    }
   }
 }

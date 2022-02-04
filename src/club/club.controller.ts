@@ -5,6 +5,7 @@ import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiParam, ApiHeader } from
 import { ClubInfo } from './types/club-info';
 import { TokensGuard } from '../tokens/tokens.guard';
 import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
+import { AuthUserData } from '../auth/types/authUserData';
 
 @ApiTags('Club')
 @ApiHeader({name: 'Authorization', description: 'Bearer token'})
@@ -16,7 +17,7 @@ export class ClubController {
 
   @ApiOperation({ summary: 'Create a new club' })
   @ApiBody({ type: CreateClubDto })
-  @ApiResponse({ status: 201, description: 'Club created successfully' })
+  @ApiResponse({ status: 201, type: AuthUserData })
   @Post('create')
   async createClub(@Body() createClubDto: CreateClubDto, @Req() req: ReqWithTokensData) {
     return await this.ClubService.createClub(createClubDto, req.user.url);
@@ -38,5 +39,11 @@ export class ClubController {
                  @Req() req: ReqWithTokensData) {
     const club = await this.ClubService.joinClub(req.user.url, clubUrl);
     return { clubUrl: club.url };
+  }
+
+  @Post(':clubUrl/leave')
+  async leaveClub(@Param('clubUrl') clubUrl: string,
+                  @Req() req: ReqWithTokensData) {
+    return this.ClubService.leaveClub(clubUrl, req.user.url);
   }
 }
