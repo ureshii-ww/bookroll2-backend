@@ -33,13 +33,12 @@ export class ClubController {
 
   @ApiOperation({ summary: 'Join the club' })
   @ApiParam({ name: 'clubUrl', required: true, description: 'Club\'s url', example: '8YoCsYP5QGx_' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: AuthUserData })
   @HttpCode(200)
   @Post(':clubUrl/join')
   async joinClub(@Param('clubUrl') clubUrl: string,
                  @Req() req: ReqWithTokensData) {
-    const club = await this.ClubService.joinClub(req.user.url, clubUrl);
-    return { clubUrl: club.url };
+    return this.ClubService.joinClub(req.user.url, clubUrl);
   }
 
   @ApiOperation({ summary: 'Leave the club' })

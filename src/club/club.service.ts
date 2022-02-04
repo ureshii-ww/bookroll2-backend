@@ -88,8 +88,8 @@ export class ClubService {
     }
   }
 
-  async joinClub(userUrl: string, url: string) {
-    const club = await this.ClubModel.findOne({ url }).populate('members').exec();
+  async joinClub(userUrl: string, clubUrl: string): Promise<AuthUserData> {
+    const club = await this.ClubModel.findOne({ url: clubUrl }).populate('members').exec();
     if (!club) {
       throw new BadRequestException({ message: 'Club not found' })
     }
@@ -103,10 +103,27 @@ export class ClubService {
       throw new BadRequestException({ message: 'User doesn\'t exist' })
     }
 
-    user.club = club._id;
-    await user.save();
+    if (user.club) {
+      throw new ConflictException();
+    }
+
     club.members.push(user._id);
-    return club.save();
+    if(!club.master) {
+      club.master = user._id;
+    }
+    await club.save();
+
+    user.club = club._id;
+    const userData = await user.save();
+    return {
+      username: userData.username,
+      url: userData.url,
+      color: userData.color,
+      emoji: userData.emoji,
+      club: clubUrl,
+      roles: userData.roles,
+      isEmailConfirmed: userData.isEmailConfirmed
+    }
   }
 
   async leaveClub(clubUrl: string, userUrl: string): Promise<AuthUserData> {
