@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -68,8 +68,20 @@ export class UserService {
   }
 
   async getUserBooks(url: string, page: number, size: number): Promise<UserBooksData> {
+    if (!page || !size) {
+      throw new BadRequestException();
+    }
+
     const user = await this.userModel.findOne({ url }).populate('club').exec();
+    if (!user) {
+      throw new BadRequestException();
+    }
+
     const clubId = user.club._id;
+    if (!clubId) {
+      throw new BadRequestException();
+    }
+
     const meetingNumber = user.club.meetingNumber;
     const listOfBooks = await this.listOfBooksService.getListOfBooksPopulated(clubId, meetingNumber);
     if (!listOfBooks) {

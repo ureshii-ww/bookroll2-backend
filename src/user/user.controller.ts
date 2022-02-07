@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserInfo } from './types/userInfo';
 import { TokensGuard } from '../tokens/tokens.guard';
 import { Response } from 'express';
+import { Book } from '../book/schemas/book.schema';
 
 @ApiTags('User')
 @ApiHeader({ name: 'Authorization', description: 'Bearer token' })
@@ -21,6 +22,11 @@ export class UserController {
     return this.userService.getUserInfo(userUrl);
   }
 
+  @ApiOperation({summary: 'Get user books'})
+  @ApiParam({ name: 'userUrl', required: true, description: 'User\'s url', example: '8YoCsYP5QGx_' })
+  @ApiResponse({type: [Book]})
+  @ApiQuery({name: 'page', example: 1})
+  @ApiQuery({name: 'size', example: 10})
   @Get(':userUrl/books')
   async getBooks(@Param('userUrl') userUrl: string,
                  @Query('page') page: number,
