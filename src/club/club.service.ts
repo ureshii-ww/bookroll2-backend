@@ -13,15 +13,21 @@ import { User, UserDocument } from '../user/schemas/user.schema';
 import { ClubInfo } from './types/club-info';
 import { CreateClubDto } from './dto/create-club.dto';
 import { AuthUserData } from '../auth/types/authUserData';
+import { ListOfBooksService } from '../list-of-books/list-of-books.service';
+import paginate from '../utils/paginate';
+import { BasicUserInfo } from '../user/types/basic-user-info';
+import { BasicBookInfo } from '../book/types/basic-book-info';
+import { ClubBooks } from './types/club-books';
 
 @Injectable()
 export class ClubService {
-  constructor(@InjectModel(Club.name) private ClubModel: Model<ClubDocument>,
-              @InjectModel(User.name) private UserModel: Model<UserDocument>) {
+  constructor(@InjectModel(Club.name) private clubModel: Model<ClubDocument>,
+              @InjectModel(User.name) private userModel: Model<UserDocument>,
+              private listOfBooksService: ListOfBooksService) {
   }
 
   async createClub({ clubname }: CreateClubDto, userUrl: string): Promise<AuthUserData> {
-    const user = await this.UserModel.findOne({ url: userUrl }).populate('club').exec();
+    const user = await this.userModel.findOne({ url: userUrl }).populate('club').exec();
     if (user.club) {
       throw new ConflictException({ message: 'User already has a club' });
     }
@@ -41,13 +47,13 @@ export class ClubService {
   }
 
   createClubDocument(newClub: Club) {
-    const createdClub = new this.ClubModel(newClub);
+    const createdClub = new this.clubModel(newClub);
     return createdClub.save();
   }
 
   async generateNewClubData(clubname: string, userUrl: string): Promise<Club> {
     const url = await nanoid(12);
-    const master = await this.UserModel.findOne({ url: userUrl }).populate('master').exec();
+    const master = await this.userModel.findOne({ url: userUrl }).populate('master').exec();
     const members = [master._id];
 
     return {
@@ -63,7 +69,7 @@ export class ClubService {
   }
 
   async getClubInfo(clubUrl: string, userUrl: string): Promise<ClubInfo> {
-    const clubData = await this.ClubModel.findOne({ url: clubUrl })
+    const clubData = await this.clubModel.findOne({ url: clubUrl })
       .populate('master').populate('bookToRead').populate('members').exec();
 
     if (!clubData) {
@@ -89,7 +95,7 @@ export class ClubService {
   }
 
   async joinClub(userUrl: string, clubUrl: string): Promise<AuthUserData> {
-    const club = await this.ClubModel.findOne({ url: clubUrl }).populate('members').exec();
+    const club = await this.clubModel.findOne({ url: clubUrl }).populate('members').exec();
     if (!club) {
       throw new BadRequestException({ message: 'Club not found' })
     }
@@ -98,7 +104,7 @@ export class ClubService {
       throw new ConflictException({ message: 'User already in the club' })
     }
 
-    const user = await this.UserModel.findOne({ url: userUrl }).exec();
+    const user = await this.userModel.findOne({ url: userUrl }).exec();
     if (!user) {
       throw new BadRequestException({ message: 'User doesn\'t exist' })
     }
@@ -127,12 +133,12 @@ export class ClubService {
   }
 
   async leaveClub(clubUrl: string, userUrl: string): Promise<AuthUserData> {
-    const club = await this.ClubModel.findOne({ url: clubUrl }).populate('master').exec();
+    const club = await this.clubModel.findOne({ url: clubUrl }).populate('master').exec();
     if (!club) {
       throw new BadRequestException();
     }
 
-    const user = await this.UserModel.findOne({ url: userUrl }).exec();
+    const user = await this.userModel.findOne({ url: userUrl }).exec();
     if (!user) {
       throw new BadRequestException();
     }
@@ -167,5 +173,40 @@ export class ClubService {
       roles: userData.roles,
       isEmailConfirmed: userData.isEmailConfirmed
     }
+  }
+
+  async getClubBooks(url: string, page: number, size: number): Promise<ClubBooks[]> {
+    const club = await this.clubModel.findOne({ url }).populate('club').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+
+    const listOfBooks = await this.listOfBooksService.getListOfBooksPopulated(club._id, club.meetingNumber);
+    if (!listOfBooks) {
+      return [];
+    }
+
+    return listOfBooks.list.map(entry => {
+      const basicUserInfo: BasicUserInfo = {
+        username: entry.user.username,
+        url: entry.user.url,
+        color: entry.user.color,
+        emoji: entry.user.emoji
+      }
+
+      const cleanedBooks = entry.books.map((book): BasicBookInfo => {
+        return {
+          id: book._id,
+          title: book.title,
+          authors: [...book.authors],
+          year: book.year
+        }
+      });
+
+      return {
+        user: basicUserInfo,
+        books: cleanedBooks
+      }
+    })
   }
 }

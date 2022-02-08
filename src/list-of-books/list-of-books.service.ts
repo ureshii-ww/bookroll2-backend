@@ -15,24 +15,33 @@ export class ListOfBooksService {
     const createdList = new this.ListOfBooksModel({
       club,
       meetingNumber,
-      list: [{user, books: [book]}]
+      list: [{ user, books: [book] }]
     });
     return createdList.save();
   }
 
   async getListOfBooks(club: string, meetingNumber: number) {
-    const query: any = {club: new mongoose.Types.ObjectId(club), meetingNumber}
+    const query: any = { club: new mongoose.Types.ObjectId(club), meetingNumber }
     return this.ListOfBooksModel.findOne(query).populate('list').exec()
   }
 
   async getListOfBooksPopulated(club: string, meetingNumber: number) {
-    const query: any = {club: new mongoose.Types.ObjectId(club), meetingNumber}
-    return this.ListOfBooksModel.findOne(query).populate({
-      path: 'list',
-      populate: {
-        path: 'books',
-        model: 'Book'
-      }
-    }).exec()
+    const query: any = { club: new mongoose.Types.ObjectId(club), meetingNumber }
+    return this.ListOfBooksModel.findOne(query)
+      .populate({
+        path: 'list',
+        populate: {
+          path: 'books',
+          model: 'Book'
+        }
+      })
+      .populate({
+        path: 'list',
+        populate: {
+          path: 'user',
+          model: 'User'
+        }
+      })
+      .exec()
   }
 }

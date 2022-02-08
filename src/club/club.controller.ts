@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ClubService } from './club.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiParam, ApiHeader } from '@nestjs/swagger';
@@ -6,6 +6,7 @@ import { ClubInfo } from './types/club-info';
 import { TokensGuard } from '../tokens/tokens.guard';
 import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
 import { AuthUserData } from '../auth/types/authUserData';
+import { Response } from 'express';
 
 @ApiTags('Club')
 @ApiHeader({ name: 'Authorization', description: 'Bearer token' })
@@ -49,5 +50,12 @@ export class ClubController {
   async leaveClub(@Param('clubUrl') clubUrl: string,
                   @Req() req: ReqWithTokensData) {
     return this.ClubService.leaveClub(clubUrl, req.user.url);
+  }
+
+  @Get(':clubUrl/books')
+  async getClubBooks(@Param('clubUrl') clubUrl: string,
+                     @Query('page') page: number,
+                     @Query('size') size: number) {
+    return this.ClubService.getClubBooks(clubUrl, page, size);
   }
 }

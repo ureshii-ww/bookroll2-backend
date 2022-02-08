@@ -88,7 +88,7 @@ export class UserService {
       return null;
     }
 
-    const userBooks = listOfBooks.list.find(el => el.user.toString() === user._id.toString());
+    const userBooks = listOfBooks.list.find(el => el.user._id.toString() === user._id.toString());
     if (!userBooks) {
       return null;
     }

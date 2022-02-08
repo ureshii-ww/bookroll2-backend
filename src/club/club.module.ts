@@ -7,6 +7,7 @@ import { User, UserSchema } from '../user/schemas/user.schema';
 import { Book, BookSchema } from '../book/schemas/book.schema';
 import { UserModule } from '../user/user.module';
 import { TokensModule } from '../tokens/tokens.module';
+import { ListOfBooksModule } from '../list-of-books/list-of-books.module';
 
 @Module({
   controllers: [ClubController],
@@ -18,7 +19,8 @@ import { TokensModule } from '../tokens/tokens.module';
       {name: Book.name, schema: BookSchema}
     ]),
     UserModule,
-    TokensModule
+    TokensModule,
+    ListOfBooksModule
   ]
 })
 export class ClubModule {}
