@@ -44,20 +44,13 @@ export class BookService {
       throw new BadRequestException();
     }
 
-    const listOfBooks = await this.ListOfBooksService.getListOfBooks(club._id, club.meetingNumber);
+    const listOfBooks = await this.ListOfBooksService.getListOfBooks(club._id, club.meetingNumber, user._id);
     //Creates list for the given club and meeting if one doesn't exist
     if (!listOfBooks) {
       return await this.ListOfBooksService.createListOfBooks(club._id, club.meetingNumber, user._id, savedBook._id);
     }
-    //Finds an index of users' item in the list
-    const index = listOfBooks.list.findIndex(el => el.user._id.toString() === user._id.toString());
-    //Creates user's item if there's no one
-    if (index === -1) {
-      listOfBooks.list.push({ user: user._id, books: [savedBook._id] });
-      return listOfBooks.save();
-    }
 
-    listOfBooks.list[index].books.push(savedBook._id)
+    listOfBooks.books.push(savedBook._id)
     return listOfBooks.save();
   }
 }

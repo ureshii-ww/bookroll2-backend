@@ -10,16 +10,19 @@ import { Club, ClubDocument } from '../club/schemas/club.schema';
 import { UserInfo } from './types/userInfo';
 import { ListOfBooksService } from '../list-of-books/list-of-books.service';
 import paginate from '../utils/paginate';
-import { UserBooksData } from './types/userBooksData';
 import { DeleteBookDto } from './dto/deleteBookDto';
+import { UserBooksData } from './types/userBooksData';
+import { BookDocument } from 'src/book/schemas/book.schema';
+import { ListOfBooksDocument } from 'src/list-of-books/schemas/list-of-books.shema';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
-              @InjectModel(Club.name) private ClubModel: Model<ClubDocument>,
-              private rolesService: RolesService,
-              private listOfBooksService: ListOfBooksService) {
-  }
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Club.name) private ClubModel: Model<ClubDocument>,
+    private rolesService: RolesService,
+    private listOfBooksService: ListOfBooksService
+  ) {}
 
   async createUser(newUser: User) {
     const createdUser = new this.userModel(newUser);
@@ -48,15 +51,15 @@ export class UserService {
       roles,
       club: null,
       reviewsArray: null,
-      isEmailConfirmed: false
-    }
+      isEmailConfirmed: false,
+    };
   }
 
   async getUserInfo(url: string): Promise<UserInfo> {
     const userData = await this.userModel.findOne({ url }).populate('club').exec();
 
     if (!userData) {
-      throw new NotFoundException({ message: 'User not found', status: HttpStatus.NOT_FOUND })
+      throw new NotFoundException({ message: 'User not found', status: HttpStatus.NOT_FOUND });
     }
 
     return {
@@ -64,23 +67,21 @@ export class UserService {
       color: userData.color,
       emoji: userData.emoji,
       clubname: userData.club?.clubname || null,
-      clubUrl: userData.club?.url || null
-    }
+      clubUrl: userData.club?.url || null,
+    };
   }
 
-  async getListOfBooksOfUsersClub(url: string) {
-    const user = await this.userModel.findOne({ url }).populate('club').exec();
+  async getUserListOfBooks(url: string): Promise<ListOfBooksDocument | null> {
+    const user = await this.getUserByUrl(url);
     if (!user) {
       throw new BadRequestException();
     }
 
-    const clubId = user.club._id;
-    if (!clubId) {
-      throw new BadRequestException();
-    }
-
-    const meetingNumber = user.club.meetingNumber;
-    const listOfBooks = await this.listOfBooksService.getListOfBooksPopulated(clubId, meetingNumber);
+    const listOfBooks = await this.listOfBooksService.getListOfBooksPopulated(
+      user.club._id,
+      user.club.meetingNumber,
+      user._id
+    );
     if (!listOfBooks) {
       return null;
     }
@@ -88,34 +89,29 @@ export class UserService {
     return listOfBooks;
   }
 
-  async getAllUserBooks(url: string) {
-    const listOfBooks = await this.getListOfBooksOfUsersClub(url);
+  async getAllUserBooks(url: string): Promise<BookDocument[] | null> {
+    const listOfBooks = await this.getUserListOfBooks(url);
     if (!listOfBooks) {
       return null;
     }
 
-    const userBooks = listOfBooks.list.find(el => el.user.url === url);
-    if (!userBooks) {
-      return null;
-    }
-
-    return userBooks;
+    return listOfBooks.books;
   }
 
-  async getUserBooks(url: string, page: number, size: number): Promise<UserBooksData> {
+  async getPaginatedUserBooks(url: string, page: number, size: number): Promise<UserBooksData> {
     if (!page || !size) {
       throw new BadRequestException();
     }
 
-    const userBooks = await this.getAllUserBooks(url);
-    if (!userBooks) {
+    const listOfBooks = await this.getAllUserBooks(url);
+    if (!listOfBooks) {
       return null;
     }
 
     return {
-      length: userBooks.books.length,
-      list: paginate(userBooks.books, page, size)
-    }
+      length: listOfBooks.length,
+      list: paginate(listOfBooks, page, size),
+    };
   }
 
   async deleteBook({ index }: DeleteBookDto, url: string, clientUrl: string) {
@@ -123,22 +119,17 @@ export class UserService {
       throw new ForbiddenException();
     }
 
-    const listOfBooks = await this.getListOfBooksOfUsersClub(url);
+    const listOfBooks = await this.getUserListOfBooks(url);
     if (!listOfBooks) {
       throw new BadRequestException();
     }
 
-    const userBooksIndex = listOfBooks.list.findIndex(el => el.user.url === url);
-    if (userBooksIndex === -1) {
+    if (index > listOfBooks.books.length) {
       throw new BadRequestException();
     }
 
-    if (index > listOfBooks.list[userBooksIndex].books.length) {
-      throw new BadRequestException();
-    }
-
-    listOfBooks.list[userBooksIndex].books.splice(index, 1);
+    listOfBooks.books.splice(index, 1);
     await listOfBooks.save();
-    return 'Success'
+    return 'Success';
   }
 }
