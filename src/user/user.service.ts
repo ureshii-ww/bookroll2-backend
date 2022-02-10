@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -11,6 +11,7 @@ import { UserInfo } from './types/userInfo';
 import { ListOfBooksService } from '../list-of-books/list-of-books.service';
 import paginate from '../utils/paginate';
 import { UserBooksData } from './types/userBooksData';
+import { DeleteBookDto } from './dto/deleteBookDto';
 
 @Injectable()
 export class UserService {
@@ -30,7 +31,7 @@ export class UserService {
   }
 
   async getUserByUrl(url: string) {
-    return this.userModel.findOne({url}).populate('club').exec();
+    return this.userModel.findOne({ url }).populate('club').exec();
   }
 
   async generateNewUserData() {
@@ -67,11 +68,7 @@ export class UserService {
     }
   }
 
-  async getUserBooks(url: string, page: number, size: number): Promise<UserBooksData> {
-    if (!page || !size) {
-      throw new BadRequestException();
-    }
-
+  async getListOfBooksOfUsersClub(url: string) {
     const user = await this.userModel.findOne({ url }).populate('club').exec();
     if (!user) {
       throw new BadRequestException();
@@ -88,7 +85,29 @@ export class UserService {
       return null;
     }
 
-    const userBooks = listOfBooks.list.find(el => el.user._id.toString() === user._id.toString());
+    return listOfBooks;
+  }
+
+  async getAllUserBooks(url: string) {
+    const listOfBooks = await this.getListOfBooksOfUsersClub(url);
+    if (!listOfBooks) {
+      return null;
+    }
+
+    const userBooks = listOfBooks.list.find(el => el.user.url === url);
+    if (!userBooks) {
+      return null;
+    }
+
+    return userBooks;
+  }
+
+  async getUserBooks(url: string, page: number, size: number): Promise<UserBooksData> {
+    if (!page || !size) {
+      throw new BadRequestException();
+    }
+
+    const userBooks = await this.getAllUserBooks(url);
     if (!userBooks) {
       return null;
     }
@@ -97,5 +116,29 @@ export class UserService {
       length: userBooks.books.length,
       list: paginate(userBooks.books, page, size)
     }
+  }
+
+  async deleteBook({ index }: DeleteBookDto, url: string, clientUrl: string) {
+    if (url !== clientUrl) {
+      throw new ForbiddenException();
+    }
+
+    const listOfBooks = await this.getListOfBooksOfUsersClub(url);
+    if (!listOfBooks) {
+      throw new BadRequestException();
+    }
+
+    const userBooksIndex = listOfBooks.list.findIndex(el => el.user.url === url);
+    if (userBooksIndex === -1) {
+      throw new BadRequestException();
+    }
+
+    if (index > listOfBooks.list[userBooksIndex].books.length) {
+      throw new BadRequestException();
+    }
+
+    listOfBooks.list[userBooksIndex].books.splice(index, 1);
+    await listOfBooks.save();
+    return 'Success'
   }
 }

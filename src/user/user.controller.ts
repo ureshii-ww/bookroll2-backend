@@ -1,10 +1,22 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get, HttpCode,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserInfo } from './types/userInfo';
 import { TokensGuard } from '../tokens/tokens.guard';
 import { Response } from 'express';
 import { Book } from '../book/schemas/book.schema';
+import { DeleteBookDto } from './dto/deleteBookDto';
+import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
 
 @ApiTags('User')
 @ApiHeader({ name: 'Authorization', description: 'Bearer token' })
@@ -38,5 +50,13 @@ export class UserController {
     } else {
       res.set({ 'x-data-length': 0 }).send([]);
     }
+  }
+
+  @HttpCode(200)
+  @Post(':userUrl/deleteBook')
+  async deleteBook(@Param('userUrl') userUrl: string,
+                   @Body() deleteBookDto: DeleteBookDto,
+                   @Req() req: ReqWithTokensData) {
+    return this.userService.deleteBook(deleteBookDto, userUrl, req.user.url);
   }
 }
