@@ -129,7 +129,12 @@ export class UserService {
     }
 
     listOfBooks.books.splice(index, 1);
-    await listOfBooks.save();
+    if(listOfBooks.books.length > 0) {
+      await listOfBooks.save();
+    } else {
+      await listOfBooks.delete();
+    }
+    
     return 'Success';
   }
 }
