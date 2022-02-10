@@ -31,7 +31,7 @@ export class AuthService {
       ...registerDto,
       password: hashPassword,
       ...generatedUserData
-    })
+    })  
   }
 
   async login(loginDto: LoginDto): Promise<AuthUserDataWithTokens> {
