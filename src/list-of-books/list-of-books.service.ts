@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from "@nestjs/mongoose";
 import { ListOfBooks, ListOfBooksDocument } from "./schemas/list-of-books.shema";
 import { Model, Schema, Types } from "mongoose";
@@ -38,5 +38,22 @@ export class ListOfBooksService {
       user: new mongoose.Types.ObjectId(user),
     };
     return this.ListOfBooksModel.findOne(query).populate("books").populate("user").exec();
+  }
+
+  async removeBookFromList(list: ListOfBooksDocument, index: number) {
+    if (!list) {
+      throw new BadRequestException();
+    }
+
+    if (index > list.books.length) {
+      throw new BadRequestException();
+    }
+
+    list.books.splice(index, 1);
+    if(list.books.length > 0) {
+      return list.save();
+    } else {
+      return list.delete();
+    }
   }
 }

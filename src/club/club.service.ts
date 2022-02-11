@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -17,13 +19,16 @@ import { BasicUserInfo } from '../user/types/basic-user-info';
 import { BasicBookInfo } from '../book/types/basic-book-info';
 import { ClubBooks } from './types/club-books';
 import { ListOfBooksDocument } from 'src/list-of-books/schemas/list-of-books.shema';
+import { DeleteBookInClubDto } from './dto/delete-book-in-club.dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ClubService {
   constructor(
     @InjectModel(Club.name) private clubModel: Model<ClubDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private listOfBooksService: ListOfBooksService
+    private listOfBooksService: ListOfBooksService,
+    private userService: UserService
   ) {}
 
   async createClub({ clubname }: CreateClubDto, userUrl: string): Promise<AuthUserData> {
@@ -183,7 +188,7 @@ export class ClubService {
     };
   }
 
-  async getClubBooks(url: string, page: number, size: number): Promise<ClubBooks[]> {
+  async getClubBooks(url: string): Promise<ClubBooks[]> {
     const club = await this.clubModel.findOne({ url }).populate('members').exec();
     if (!club) {
       throw new BadRequestException();
@@ -225,5 +230,32 @@ export class ClubService {
         books: cleanedBooks,
       };
     });
+  }
+
+  async deleteBook(clientUrl: string, clubUrl: string, { userUrl, index }: DeleteBookInClubDto) {
+    const club = await this.clubModel.findOne({ url: clubUrl }).populate('members').populate('master').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+    if (clientUrl !== club.master.url) {
+      throw new ForbiddenException();
+    }
+
+    const user = await this.userModel.findOne({ url: userUrl }).populate('club').exec();
+    if (!user) {
+      throw new BadRequestException();
+    }
+
+    if (user.club._id.toString() !== club._id.toString()) {
+      throw new ForbiddenException();
+    }
+
+    const listOfBooks = await this.userService.getUserListOfBooks(userUrl);
+    const isDeleted = await this.listOfBooksService.removeBookFromList(listOfBooks, index);
+
+    if (isDeleted) {
+      return 'Success';
+    }
+    throw new InternalServerErrorException();
   }
 }

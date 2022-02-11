@@ -1,4 +1,11 @@
-import { BadRequestException, ForbiddenException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -59,7 +66,10 @@ export class UserService {
     const userData = await this.userModel.findOne({ url }).populate('club').exec();
 
     if (!userData) {
-      throw new NotFoundException({ message: 'User not found', status: HttpStatus.NOT_FOUND });
+      throw new NotFoundException({
+        message: 'User not found',
+        status: HttpStatus.NOT_FOUND,
+      });
     }
 
     return {
@@ -120,21 +130,11 @@ export class UserService {
     }
 
     const listOfBooks = await this.getUserListOfBooks(url);
-    if (!listOfBooks) {
-      throw new BadRequestException();
-    }
+    const isRemoved = await this.listOfBooksService.removeBookFromList(listOfBooks, index);
 
-    if (index > listOfBooks.books.length) {
-      throw new BadRequestException();
+    if (isRemoved) {
+      return 'Success';
     }
-
-    listOfBooks.books.splice(index, 1);
-    if(listOfBooks.books.length > 0) {
-      await listOfBooks.save();
-    } else {
-      await listOfBooks.delete();
-    }
-    
-    return 'Success';
+    throw new InternalServerErrorException();
   }
 }
