@@ -21,6 +21,12 @@ import { DeleteBookDto } from './dto/deleteBookDto';
 import { UserBooksData } from './types/userBooksData';
 import { BookDocument } from 'src/book/schemas/book.schema';
 import { ListOfBooksDocument } from 'src/list-of-books/schemas/list-of-books.shema';
+import { UpdateInfoDto } from './dto/update-info-dto';
+import { AuthUserData } from '../auth/types/authUserData';
+import { UpdatePasswordDto } from './dto/update-password-dto';
+import { UserAccountInfo } from './types/user-account-info';
+import maskEmail from '../utils/maskEmail';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -28,8 +34,9 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Club.name) private ClubModel: Model<ClubDocument>,
     private rolesService: RolesService,
-    private listOfBooksService: ListOfBooksService
-  ) {}
+    private listOfBooksService: ListOfBooksService,
+  ) {
+  }
 
   async createUser(newUser: User) {
     const createdUser = new this.userModel(newUser);
@@ -90,7 +97,7 @@ export class UserService {
     const listOfBooks = await this.listOfBooksService.getListOfBooksPopulated(
       user.club._id,
       user.club.meetingNumber,
-      user._id
+      user._id,
     );
     if (!listOfBooks) {
       return null;
@@ -136,5 +143,55 @@ export class UserService {
       return 'Success';
     }
     throw new InternalServerErrorException();
+  }
+
+  async updateInfo(url: string, { username, color, emoji }: UpdateInfoDto, clientUrl: string): Promise<AuthUserData> {
+    if (url !== clientUrl) {
+      throw new ForbiddenException();
+    }
+
+    const user = await this.getUserByUrl(url);
+    user.username = username;
+    user.color = color;
+    user.emoji = emoji;
+    await user.save();
+    return {
+      username: user.username,
+      url: user.url,
+      color: user.color,
+      emoji: user.emoji,
+      roles: user.roles,
+      isEmailConfirmed: user.isEmailConfirmed,
+      club: user.club._id,
+    };
+  }
+
+  async getAccountInfo(url: string, clientUrl: string): Promise<UserAccountInfo> {
+    if (url !== clientUrl) {
+      throw new ForbiddenException();
+    }
+
+    const user = await this.getUserByUrl(url);
+    return {
+      email: maskEmail(user.email),
+    };
+  }
+
+  async updatePassword(url: string, { oldPassword, newPassword }: UpdatePasswordDto, clientUrl: string) {
+    if (url !== clientUrl) {
+      throw new ForbiddenException();
+    }
+    const user = await this.getUserByUrl(url);
+    if (!user) {
+      throw new BadRequestException();
+    }
+
+    const passwordEqual = await bcrypt.compare(oldPassword, user.password);
+    if (passwordEqual) {
+      user.password = await bcrypt.hash(newPassword, 8);
+      await user.save();
+      return 'Success';
+    }
+    throw new ForbiddenException({message: 'Wrong password'});
   }
 }

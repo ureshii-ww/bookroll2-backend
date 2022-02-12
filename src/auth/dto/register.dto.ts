@@ -11,6 +11,7 @@ export class RegisterDto {
   @ApiProperty({example: 'usermail@gmail.com', required: true, description: 'Email'})
   @IsString({message: 'Should be a string'})
   @IsEmail({}, {message: 'Should be an email'})
+  @Length(6, 128)
   readonly email: string;
 
   @ApiProperty({example: 'pass1234', required: true, description: 'Password'})
