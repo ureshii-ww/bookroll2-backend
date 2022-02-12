@@ -7,6 +7,7 @@ import { TokensGuard } from '../tokens/tokens.guard';
 import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
 import { AuthUserData } from '../auth/types/authUserData';
 import { DeleteBookInClubDto } from './dto/delete-book-in-club.dto';
+import { UpdateSettingsDto } from './dto/update-settings.dto';
 
 @ApiTags('Club')
 @ApiHeader({ name: 'Authorization', description: 'Bearer token' })
@@ -76,5 +77,19 @@ export class ClubController {
     @Req() req: ReqWithTokensData
   ) {
     return this.ClubService.deleteBook(req.user.url, clubUrl, deleteBookInClubDto);
+  }
+
+  @Get(':clubUrl/settingsInfo')
+  async getSettingsInfo(@Param('clubUrl') clubUrl: string, @Req() req: ReqWithTokensData) {
+    return this.ClubService.getSettingsInfo(clubUrl, req.user.url);
+  }
+
+  @Post(':clubUrl/updateSettings')
+  async updateSettings(
+    @Param('clubUrl') clubUrl: string,
+    @Body() updateSettingsDto: UpdateSettingsDto,
+    @Req() req: ReqWithTokensData
+  ) {
+    return this.ClubService.updateSettings(clubUrl, req.user.url, updateSettingsDto);
   }
 }

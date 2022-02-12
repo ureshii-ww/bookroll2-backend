@@ -30,6 +30,9 @@ export class Club {
 
   @Prop()
   clubRules: string | null;
+
+  @Prop()
+  description: string;
 }
 
 export const ClubSchema = SchemaFactory.createForClass(Club);

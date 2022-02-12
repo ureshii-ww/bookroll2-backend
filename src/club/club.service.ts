@@ -21,6 +21,8 @@ import { ClubBooks } from './types/club-books';
 import { ListOfBooksDocument } from 'src/list-of-books/schemas/list-of-books.shema';
 import { DeleteBookInClubDto } from './dto/delete-book-in-club.dto';
 import { UserService } from 'src/user/user.service';
+import { UpdateSettingsDto } from './dto/update-settings.dto';
+import { ClubSettingsInfo, ClubSettingsInfoMember } from './types/club-settings-info';
 
 @Injectable()
 export class ClubService {
@@ -70,6 +72,7 @@ export class ClubService {
       meetingNumber: 1,
       chosenBooksHistory: null,
       clubRules: null,
+      description: '',
     };
   }
 
@@ -257,5 +260,52 @@ export class ClubService {
       return 'Success';
     }
     throw new InternalServerErrorException();
+  }
+
+  async getSettingsInfo(clubUrl: string, clientUrl: string): Promise<ClubSettingsInfo> {
+    const club = await this.clubModel.findOne({ url: clubUrl }).populate('master').populate('members').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+    if (clientUrl !== club.master.url) {
+      throw new ForbiddenException();
+    }
+
+    const membersArray: ClubSettingsInfoMember[] = [{ url: club.master.url, username: club.master.username }];
+    for (let i = 0; i < club.members.length; i++) {
+      const currentMember = club.members[i];
+      if (currentMember.url !== club.master.url) {
+        membersArray.push({ url: currentMember.url, username: currentMember.username });
+      }
+    }
+
+    return {
+      clubname: club.clubname,
+      description: club.description,
+      members: membersArray
+    }
+  }
+
+  async updateSettings(clubUrl: string, clientUrl: string, { clubname, masterUrl, description }: UpdateSettingsDto) {
+    const club = await this.clubModel.findOne({ url: clubUrl }).populate('master').populate('members').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+    if (clientUrl !== club.master.url) {
+      throw new ForbiddenException();
+    }
+    const newMaster = await this.userService.getUserByUrl(masterUrl);
+    if (!newMaster) {
+      throw new BadRequestException();
+    }
+    const isMasterInClub = club.members.some(member => member.url === masterUrl);
+    if (!isMasterInClub) {
+      throw new BadRequestException();
+    }
+    club.master = newMaster._id;
+    club.clubname = clubname;
+    club.description = description;
+    await club.save();
+    return 'Success';
   }
 }
