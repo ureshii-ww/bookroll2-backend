@@ -55,7 +55,7 @@ export class UserService {
     const userRole = await this.rolesService.getRoleByName('user');
     const url = await nanoid(12);
     const color: string = await randomcolor({ luminosity: 'light' });
-    const emoji: string = await randomEmoji();
+    const emoji: string = randomEmoji();
     const roles = [userRole._id];
 
     return {
@@ -162,7 +162,7 @@ export class UserService {
       emoji: user.emoji,
       roles: user.roles,
       isEmailConfirmed: user.isEmailConfirmed,
-      club: user.club._id,
+      club: user.club.url,
     };
   }
 

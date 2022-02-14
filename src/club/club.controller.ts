@@ -8,13 +8,15 @@ import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
 import { AuthUserData } from '../auth/types/authUserData';
 import { DeleteBookInClubDto } from './dto/delete-book-in-club.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
+import { ConfirmBookDto } from './dto/confirm-book.dto';
 
 @ApiTags('Club')
 @ApiHeader({ name: 'Authorization', description: 'Bearer token' })
 @Controller('club')
 @UseGuards(TokensGuard)
 export class ClubController {
-  constructor(private ClubService: ClubService) {}
+  constructor(private ClubService: ClubService) {
+  }
 
   @ApiOperation({ summary: 'Create a new club' })
   @ApiBody({ type: CreateClubDto })
@@ -29,7 +31,7 @@ export class ClubController {
   @ApiParam({
     name: 'clubUrl',
     required: true,
-    description: "Club's url",
+    description: 'Club\'s url',
     example: '8YoCsYP5QGx_',
   })
   @Get(':clubUrl/info')
@@ -41,7 +43,7 @@ export class ClubController {
   @ApiParam({
     name: 'clubUrl',
     required: true,
-    description: "Club's url",
+    description: 'Club\'s url',
     example: '8YoCsYP5QGx_',
   })
   @ApiResponse({ status: 200, type: AuthUserData })
@@ -55,7 +57,7 @@ export class ClubController {
   @ApiParam({
     name: 'clubUrl',
     required: true,
-    description: "Club's url",
+    description: 'Club\'s url',
     example: '8YoCsYP5QGx_',
   })
   @ApiResponse({ status: 200, type: AuthUserData })
@@ -74,7 +76,7 @@ export class ClubController {
   async deleteBookInClub(
     @Param('clubUrl') clubUrl: string,
     @Body() deleteBookInClubDto: DeleteBookInClubDto,
-    @Req() req: ReqWithTokensData
+    @Req() req: ReqWithTokensData,
   ) {
     return this.ClubService.deleteBook(req.user.url, clubUrl, deleteBookInClubDto);
   }
@@ -88,8 +90,13 @@ export class ClubController {
   async updateSettings(
     @Param('clubUrl') clubUrl: string,
     @Body() updateSettingsDto: UpdateSettingsDto,
-    @Req() req: ReqWithTokensData
+    @Req() req: ReqWithTokensData,
   ) {
     return this.ClubService.updateSettings(clubUrl, req.user.url, updateSettingsDto);
+  }
+
+  @Post(':clubUrl/confirmBook')
+  confirmBook(@Param('clubUrl') clubUrl: string, @Body() confirmBookDto: ConfirmBookDto, @Req() req: ReqWithTokensData) {
+    return this.ClubService.confirmBook(clubUrl, confirmBookDto, req.user.url)
   }
 }

@@ -23,12 +23,16 @@ import { DeleteBookInClubDto } from './dto/delete-book-in-club.dto';
 import { UserService } from 'src/user/user.service';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { ClubSettingsInfo, ClubSettingsInfoMember } from './types/club-settings-info';
+import { ConfirmBookDto } from './dto/confirm-book.dto';
+import * as mongoose from 'mongoose';
+import { Book, BookDocument } from '../book/schemas/book.schema';
 
 @Injectable()
 export class ClubService {
   constructor(
     @InjectModel(Club.name) private clubModel: Model<ClubDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Book.name) private BookModel: Model<BookDocument>,
     private listOfBooksService: ListOfBooksService,
     private userService: UserService
   ) {}
@@ -282,8 +286,8 @@ export class ClubService {
     return {
       clubname: club.clubname,
       description: club.description,
-      members: membersArray
-    }
+      members: membersArray,
+    };
   }
 
   async updateSettings(clubUrl: string, clientUrl: string, { clubname, masterUrl, description }: UpdateSettingsDto) {
@@ -306,6 +310,22 @@ export class ClubService {
     club.clubname = clubname;
     club.description = description;
     await club.save();
+    return 'Success';
+  }
+
+  async confirmBook(clubUrl: string, { book }: ConfirmBookDto, clientUrl: string) {
+    const club = await this.clubModel.findOne({url: clubUrl}).populate('master').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+    if (clientUrl !== club.master.url) {
+      throw new ForbiddenException();
+    }
+    const bookData = await this.BookModel.findOne({_id: book}).exec();
+
+    club.bookToRead = bookData._id;
+    club.meetingNumber += 1;
+    await club.save()
     return 'Success';
   }
 }

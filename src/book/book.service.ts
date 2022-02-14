@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Book, BookDocument } from './schemas/book.schema';
 import { Model } from 'mongoose';
@@ -9,6 +9,7 @@ import { ListOfBooksService } from '../list-of-books/list-of-books.service';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { ListOfBooks, ListOfBooksDocument } from '../list-of-books/schemas/list-of-books.shema';
 import { ConfirmDto } from './dto/confirm.dto';
+import { BookData } from './types/book-data';
 
 
 @Injectable()
@@ -52,5 +53,20 @@ export class BookService {
 
     listOfBooks.books.push(savedBook._id)
     return listOfBooks.save();
+  }
+
+  async getBookData(id: string): Promise<BookData> {
+    const book = await this.BookModel.findOne({_id: id}).exec();
+    if (!book) {
+      throw new NotFoundException();
+    }
+    return {
+      title: book.title,
+      authors: book.authors,
+      year: book.year,
+      cover: book.cover,
+      description: book.description,
+      genres: book.genres
+    }
   }
 }

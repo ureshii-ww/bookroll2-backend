@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { BookService } from './book.service';
 import { ConfirmDto } from './dto/confirm.dto';
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -28,5 +28,10 @@ export class BookController {
   async confirmBook(@Body() confirmDto: ConfirmDto, @Req() req: ReqWithTokensData) {
     await this.BookService.confirmBook(confirmDto, req.user.url);
     return 'Book added successfully';
+  }
+
+  @Get(':bookId')
+  async getBookData(@Param('bookId') id: string) {
+    return this.BookService.getBookData(id);
   }
 }
