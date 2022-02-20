@@ -8,5 +8,5 @@ export class UpdateSettingsDto {
   readonly masterUrl: string;
 
   @IsString()
-  readonly description: string;
+  readonly rules: string;
 }

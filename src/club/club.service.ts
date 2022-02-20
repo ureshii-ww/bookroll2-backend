@@ -26,6 +26,7 @@ import { ClubSettingsInfo, ClubSettingsInfoMember } from './types/club-settings-
 import { ConfirmBookDto } from './dto/confirm-book.dto';
 import * as mongoose from 'mongoose';
 import { Book, BookDocument } from '../book/schemas/book.schema';
+import { BookData } from '../book/types/book-data';
 
 @Injectable()
 export class ClubService {
@@ -74,9 +75,8 @@ export class ClubService {
       bookToRead: null,
       master: master._id,
       meetingNumber: 1,
-      chosenBooksHistory: null,
+      chosenBooksHistory: [],
       clubRules: null,
-      description: '',
     };
   }
 
@@ -286,12 +286,12 @@ export class ClubService {
 
     return {
       clubname: club.clubname,
-      description: club.description,
+      rules: club.clubRules || '',
       members: membersArray,
     };
   }
 
-  async updateSettings(clubUrl: string, clientUrl: string, { clubname, masterUrl, description }: UpdateSettingsDto) {
+  async updateSettings(clubUrl: string, clientUrl: string, { clubname, masterUrl, rules }: UpdateSettingsDto) {
     const club = await this.clubModel.findOne({ url: clubUrl }).populate('master').populate('members').exec();
     if (!club) {
       throw new BadRequestException();
@@ -309,24 +309,69 @@ export class ClubService {
     }
     club.master = newMaster._id;
     club.clubname = clubname;
-    club.description = description;
+    club.clubRules = rules;
     await club.save();
     return 'Success';
   }
 
   async confirmBook(clubUrl: string, { book }: ConfirmBookDto, clientUrl: string) {
-    const club = await this.clubModel.findOne({url: clubUrl}).populate('master').exec();
+    const club = await this.clubModel.findOne({ url: clubUrl }).populate('master').exec();
     if (!club) {
       throw new BadRequestException();
     }
     if (clientUrl !== club.master.url) {
       throw new ForbiddenException();
     }
-    const bookData = await this.BookModel.findOne({_id: book}).exec();
+    const bookData = await this.BookModel.findOne({ _id: book }).exec();
 
     club.bookToRead = bookData._id;
+    const tempArr = [...club.chosenBooksHistory];
+    tempArr.push(bookData._id);
+    club.chosenBooksHistory = tempArr;
     club.meetingNumber += 1;
-    await club.save()
+    await club.save();
     return 'Success';
+  }
+
+  async getChosenBooksHistory(url: string): Promise<BookData[]> {
+    const club = await this.clubModel.findOne({ url }).populate('chosenBooksHistory').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+    if (club.chosenBooksHistory.length === 0) {
+      return [];
+    }
+    return club.chosenBooksHistory;
+  }
+
+  async getClubMembers(url: string): Promise<BasicUserInfo[]> {
+    const club = await this.clubModel.findOne({ url }).populate('members').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+    if (club.members.length === 0) {
+      return [];
+    }
+    const tempArr: BasicUserInfo[] = [];
+    club.members.forEach(member => {
+      tempArr.push({
+        username: member.username,
+        url: member.url,
+        emoji: member.emoji,
+        color: member.color,
+      });
+    });
+    return tempArr;
+  }
+
+  async getClubRules(url: string): Promise<string> {
+    const club = await this.clubModel.findOne({ url }).exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+    if (!club.clubRules) {
+      return ''
+    }
+    return club.clubRules;
   }
 }

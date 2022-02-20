@@ -5,6 +5,6 @@ export class ClubSettingsInfoMember {
 
 export class ClubSettingsInfo {
   readonly clubname: string;
-  readonly description: string;
+  readonly rules: string;
   readonly members: ClubSettingsInfoMember[];
 }
