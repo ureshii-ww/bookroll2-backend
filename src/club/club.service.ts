@@ -94,7 +94,7 @@ export class ClubService {
 
     const isInClub: boolean = clubData.members.some(member => member.url === userUrl);
 
-    const { clubname, master, bookToRead } = clubData;
+    const { clubname, master, bookToRead, meetingNumber } = clubData;
     return {
       clubname,
       master: master
@@ -109,6 +109,7 @@ export class ClubService {
             authors: bookToRead.authors,
           }
         : null,
+      meetingNumber,
       isMaster: master ? userUrl === master.url : false,
       isInClub: isInClub,
     };

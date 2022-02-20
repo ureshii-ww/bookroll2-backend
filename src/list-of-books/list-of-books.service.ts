@@ -51,9 +51,11 @@ export class ListOfBooksService {
 
     list.books.splice(index, 1);
     if(list.books.length > 0) {
-      return list.save();
+      const newList = await list.save();
+      return newList.books.length;
     } else {
-      return list.delete();
+      await list.delete();
+      return 0;
     }
   }
 }

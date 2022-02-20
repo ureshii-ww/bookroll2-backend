@@ -50,9 +50,11 @@ export class UserController {
   async deleteBook(
     @Param('userUrl') userUrl: string,
     @Body() deleteBookDto: DeleteBookDto,
-    @Req() req: ReqWithTokensData
+    @Req() req: ReqWithTokensData,
+    @Res() res: Response
   ) {
-    return this.userService.deleteBook(deleteBookDto, userUrl, req.user.url);
+    const newLength = await this.userService.deleteBook(deleteBookDto, userUrl, req.user.url);
+    res.set({ 'x-data-length': newLength }).send('Success');
   }
 
   @Post(':userUrl/updateInfo')

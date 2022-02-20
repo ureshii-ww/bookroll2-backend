@@ -93,6 +93,9 @@ export class UserService {
     if (!user) {
       throw new BadRequestException();
     }
+    if (!user.club) {
+      return null;
+    }
 
     const listOfBooks = await this.listOfBooksService.getListOfBooksPopulated(
       user.club._id,
@@ -137,12 +140,7 @@ export class UserService {
     }
 
     const listOfBooks = await this.getUserListOfBooks(url);
-    const isRemoved = await this.listOfBooksService.removeBookFromList(listOfBooks, index);
-
-    if (isRemoved) {
-      return 'Success';
-    }
-    throw new InternalServerErrorException();
+    return this.listOfBooksService.removeBookFromList(listOfBooks, index);
   }
 
   async updateInfo(url: string, { username, color, emoji }: UpdateInfoDto, clientUrl: string): Promise<AuthUserData> {
