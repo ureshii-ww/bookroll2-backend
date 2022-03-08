@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -27,16 +20,18 @@ import { UpdatePasswordDto } from './dto/update-password-dto';
 import { UserAccountInfo } from './types/user-account-info';
 import maskEmail from '../utils/maskEmail';
 import * as bcrypt from 'bcryptjs';
+import { Review, ReviewDocument } from '../review/schemas/review.schema';
+import { DeleteUserReviewDto } from './dto/delete-user-review.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Club.name) private ClubModel: Model<ClubDocument>,
+    @InjectModel(Review.name) private reviewModel: Model<ReviewDocument>,
     private rolesService: RolesService,
-    private listOfBooksService: ListOfBooksService,
-  ) {
-  }
+    private listOfBooksService: ListOfBooksService
+  ) {}
 
   async createUser(newUser: User) {
     const createdUser = new this.userModel(newUser);
@@ -100,7 +95,7 @@ export class UserService {
     const listOfBooks = await this.listOfBooksService.getListOfBooksPopulated(
       user.club._id,
       user.club.meetingNumber,
-      user._id,
+      user._id
     );
     if (!listOfBooks) {
       return null;
@@ -190,6 +185,54 @@ export class UserService {
       await user.save();
       return 'Success';
     }
-    throw new ForbiddenException({message: 'Wrong password'});
+    throw new ForbiddenException({ message: 'Wrong password' });
+  }
+
+  // async getAllUserReviews(userId: string) {
+  //   const filter: any = { author: userId };
+  //   const reviews = await this.reviewModel.find(filter).paginate('book').exec();
+  //   if (reviews) {
+  //     return reviews;
+  //   } else {
+  //     return [];
+  //   }
+  // }
+
+  // async getPaginatedUserReviews(url: string, page: number, size: number) {
+  //   const user = await this.userModel.findOne({ url }).exec();
+  //   if (!user) {
+  //     throw new NotFoundException();
+  //   }
+  //   const reviews = await this.getAllUserReviews(user._id);
+  //   if (reviews.length > 0) {
+  //     return {
+  //       length: reviews.length,
+  //       list: paginate(reviews, page, size),
+  //     };
+  //   } else {
+  //     return {
+  //       length: 0,
+  //       list: reviews,
+  //     };
+  //   }
+  // }
+
+  async deleteUserReview({ reviewId }: DeleteUserReviewDto, userUrl: string, clientUrl: string) {
+    if (userUrl !== clientUrl) {
+      throw new ForbiddenException();
+    }
+    const user = await this.userModel.findOne({ url: clientUrl }).exec();
+    if (!user) {
+      throw new BadRequestException();
+    }
+    const reviews = await this.reviewModel.find({ author: user._id }).exec();
+    const reviewIndex = reviews.findIndex(review => review._id.toString() === reviewId);
+    if (reviewIndex === -1) {
+      throw new NotFoundException();
+    }
+    const success = await reviews[reviewIndex].delete();
+    if (success) {
+      return reviews.length - 1;
+    }
   }
 }

@@ -8,19 +8,21 @@ import { Book, BookSchema } from '../book/schemas/book.schema';
 import { UserModule } from '../user/user.module';
 import { TokensModule } from '../tokens/tokens.module';
 import { ListOfBooksModule } from '../list-of-books/list-of-books.module';
+import { Review, ReviewSchema } from '../review/schemas/review.schema';
 
 @Module({
   controllers: [ClubController],
   providers: [ClubService],
   imports: [
     MongooseModule.forFeature([
-      {name: Club.name, schema: ClubSchema},
-      {name: User.name, schema: UserSchema},
-      {name: Book.name, schema: BookSchema}
+      { name: Club.name, schema: ClubSchema },
+      { name: User.name, schema: UserSchema },
+      { name: Book.name, schema: BookSchema },
+      { name: Review.name, schema: ReviewSchema },
     ]),
     UserModule,
     TokensModule,
-    ListOfBooksModule
-  ]
+    ListOfBooksModule,
+  ],
 })
 export class ClubModule {}

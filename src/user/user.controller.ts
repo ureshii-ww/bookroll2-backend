@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserInfo } from './types/userInfo';
@@ -9,6 +9,7 @@ import { DeleteBookDto } from './dto/deleteBookDto';
 import { ReqWithTokensData } from '../tokens/types/reqWithTokensData.interface';
 import { UpdateInfoDto } from './dto/update-info-dto';
 import { UpdatePasswordDto } from './dto/update-password-dto';
+import { DeleteUserReviewDto } from './dto/delete-user-review.dto';
 
 @ApiTags('User')
 @ApiHeader({ name: 'Authorization', description: 'Bearer token' })
@@ -74,5 +75,31 @@ export class UserController {
     @Req() req: ReqWithTokensData
   ) {
     return this.userService.updatePassword(userUrl, updatePasswordDto, req.user.url);
+  }
+
+  // @Get(':userUrl/reviews')
+  // async getUserReviews(
+  //   @Param('userUrl') userUrl: string,
+  //   @Query('page') page: number,
+  //   @Query('size') size: number,
+  //   @Res() res: Response
+  // ) {
+  //   const serviceData = await this.userService.getPaginatedUserReviews(userUrl, page, size);
+  //   if (serviceData && serviceData.length > 0) {
+  //     res.set({ 'x-data-length': serviceData.length }).json(serviceData.list);
+  //   } else {
+  //     res.set({ 'x-data-length': 0 }).send([]);
+  //   }
+  // }
+
+  @Delete(':userUrl')
+  async deleteUserReview(
+    @Param('userUrl') userUrl: string,
+    @Body() deleteUserReviewDto: DeleteUserReviewDto,
+    @Req() req: ReqWithTokensData,
+    @Res() res: Response
+  ) {
+    const newLength = await this.userService.deleteUserReview(deleteUserReviewDto, userUrl, req.user.url);
+    res.set({ 'x-data-length': newLength }).send('Success');
   }
 }

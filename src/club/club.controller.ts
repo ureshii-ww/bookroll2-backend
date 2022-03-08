@@ -117,4 +117,9 @@ export class ClubController {
   getClubRules(@Param('clubUrl') clubUrl: string) {
     return this.ClubService.getClubRules(clubUrl);
   }
+
+  @Get(':clubUrl/:bookId/reviews')
+  getClubReviews(@Param('clubUrl') clubUrl: string, @Param('bookId') bookId: string) {
+    return this.ClubService.getClubReviews(clubUrl, bookId);
+  }
 }

@@ -24,9 +24,10 @@ import { UserService } from 'src/user/user.service';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 import { ClubSettingsInfo, ClubSettingsInfoMember } from './types/club-settings-info';
 import { ConfirmBookDto } from './dto/confirm-book.dto';
-import * as mongoose from 'mongoose';
 import { Book, BookDocument } from '../book/schemas/book.schema';
 import { BookData } from '../book/types/book-data';
+import { ReviewDocument } from '../review/schemas/review.schema';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class ClubService {
@@ -34,6 +35,7 @@ export class ClubService {
     @InjectModel(Club.name) private clubModel: Model<ClubDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Book.name) private BookModel: Model<BookDocument>,
+    @InjectModel(Book.name) private reviewModel: Model<ReviewDocument>,
     private listOfBooksService: ListOfBooksService,
     private userService: UserService
   ) {}
@@ -370,8 +372,25 @@ export class ClubService {
       throw new BadRequestException();
     }
     if (!club.clubRules) {
-      return ''
+      return '';
     }
     return club.clubRules;
+  }
+
+  async getClubReviews(clubUrl: string, bookId: string): Promise<ReviewDocument[]> {
+    const club = await this.clubModel.findOne({ url: clubUrl }).populate('members').exec();
+    if (!club) {
+      throw new BadRequestException();
+    }
+    const members = club.members;
+    const reviews: ReviewDocument[] = [];
+    for (const member of members) {
+      const filter: any = { book: bookId, author: member._id };
+      const review = await this.reviewModel.findOne(filter).exec();
+      if (review) {
+        reviews.push(review);
+      }
+    }
+    return reviews;
   }
 }
