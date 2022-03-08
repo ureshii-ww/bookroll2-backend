@@ -1,11 +1,14 @@
-import { IsEmail, IsString, Length } from 'class-validator';
+import { IsString, Length, MinLength } from 'class-validator';
+import authDataLength from '../../constants/auth-data-length';
+
+const { PASSWORD_MIN_LENGTH } = authDataLength;
 
 export class UpdatePasswordDto {
-  @IsString({message: 'Should be a string'})
-  @Length(6, 128, {message: 'Password must be longer than 6 and shorter than 128 symbols'})
+  @IsString({ message: 'Should be a string' })
+  @MinLength(PASSWORD_MIN_LENGTH, { message: 'Password should be longer than 6 symbols' })
   readonly oldPassword: string;
 
-  @IsString({message: 'Should be a string'})
-  @Length(6, 128, {message: 'Password must be longer than 6 and shorter than 128 symbols'})
+  @IsString({ message: 'Should be a string' })
+  @MinLength(PASSWORD_MIN_LENGTH, { message: 'Password should be longer than 6 symbols' })
   readonly newPassword: string;
 }

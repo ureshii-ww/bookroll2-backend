@@ -37,7 +37,7 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthUserDataWithTokens> {
     const user = await this.userService.getUserByEmail(loginDto.email);
     if (!user) {
-      throw new ForbiddenException({ message: 'Wrong email or password' });
+      throw new ForbiddenException({ message: 'Неверный email или пароль' });
     }
 
     const passwordEquals: boolean = await bcrypt.compare(loginDto.password, user.password)
@@ -60,7 +60,7 @@ export class AuthService {
       }
     }
 
-    throw new ForbiddenException({ message: 'Wrong email or password', status: HttpStatus.UNAUTHORIZED });
+    throw new ForbiddenException({ message: 'Неверный email или пароль', status: HttpStatus.UNAUTHORIZED });
   }
 
   async logout(refreshToken: string) {
