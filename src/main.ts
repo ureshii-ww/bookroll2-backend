@@ -13,7 +13,7 @@ async function start() {
     exposedHeaders: ['x-access-token', 'x-data-length']
   });
   app.use(cookieParser());
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('v1');
   app.useGlobalPipes(new ValidationPipe());
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Книжный клуб')
