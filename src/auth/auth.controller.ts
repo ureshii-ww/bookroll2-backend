@@ -35,7 +35,7 @@ export class AuthController {
       .cookie('refreshToken', authData.refreshToken, {
         maxAge: ms(REFRESH_TOKEN_EXPIRES),
         httpOnly: true,
-        //secure: true
+        secure: true
       })
       .set({ 'x-access-token': authData.accessToken });
 
@@ -64,7 +64,7 @@ export class AuthController {
     res.cookie('refreshToken', newTokens.refreshToken, {
       maxAge: ms(REFRESH_TOKEN_EXPIRES),
       httpOnly: true,
-      //secure: true
+      secure: true
     })
       .set({ 'x-access-token': newTokens.accessToken }).sendStatus(201);
   }
